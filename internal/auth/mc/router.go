@@ -89,6 +89,7 @@ func (r *routerService) GetUser(ctx context.Context, res *auth.GetUserRequest) (
 			RegisteredIp: user.RegisteredIP,
 			LastServer:   user.LastServer,
 			Session:      timestamppb.New(user.Session),
+			Auth:         user.Authorized,
 		},
 	}, nil
 }

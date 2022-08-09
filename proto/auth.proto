@@ -14,10 +14,6 @@ service Auth {
     rpc UnRegister(UnRegisterRequest) returns (Empty) {}
 }
 
-message CheckAuthRequest {
-    string username = 1;
-}
-
 message Empty {
 
 }
@@ -79,7 +75,8 @@ message User {
     string ip = 6;
     string registeredIp = 7;
     bool lisense = 8;
-    google.protobuf.Timestamp session = 9;
+    bool auth = 9;
+    google.protobuf.Timestamp session = 10;
 }
 
 message UnRegisterRequest {

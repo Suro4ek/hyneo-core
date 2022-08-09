@@ -10,3 +10,7 @@ func RegisterCommands() {
 	RegisterCommand(Bind)
 	RegisterCommand(UnBind)
 }
+
+func GetCommands() map[string]*Command {
+	return commands
+}

@@ -8,20 +8,24 @@ import (
 	"hyneo/pkg/mysql"
 	"strings"
 
-	"github.com/SevereCloud/vksdk/api"
-	"github.com/SevereCloud/vksdk/api/params"
+	"github.com/SevereCloud/vksdk/v2/api"
+	"github.com/SevereCloud/vksdk/v2/api/params"
 	"github.com/SevereCloud/vksdk/v2/events"
 	"github.com/SevereCloud/vksdk/v2/object"
 )
 
 type VKService struct {
 	Client mysql.Client
-	Vk     api.VK
+	Vk     *api.VK
 	Code   code.CodeService
 }
 
-func NewVkService() services.Service {
-	return &VKService{}
+func NewVkService(Client *mysql.Client, VK *api.VK, Code code.CodeService) services.Service {
+	return &VKService{
+		Client: *Client,
+		Vk:     VK,
+		Code:   Code,
+	}
 }
 
 func (s *VKService) GetUser(vkID int) (user1 interface{}, err error) {

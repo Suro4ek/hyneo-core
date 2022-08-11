@@ -12,7 +12,7 @@ import (
 type PasswordService struct {
 }
 
-func newPasswordService() PasswordService {
+func NewPasswordService() PasswordService {
 	return PasswordService{}
 }
 func (s *PasswordService) ComparePassword(hash string, password string) bool {

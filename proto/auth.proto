@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package server;
 import "google/protobuf/timestamp.proto";
-option go_package = "eu.suro/hyneo/protos/auth";
+option go_package = "protos/auth/";
 
 service Auth {
     rpc Login(LoginRequest) returns (Empty) {}

@@ -1,6 +1,7 @@
 package telegram
 
 import (
+	"hyneo/internal/auth/services"
 	"hyneo/internal/auth/services/command"
 	"strings"
 
@@ -9,10 +10,10 @@ import (
 
 type handler struct {
 	bot     *tgbotapi.BotAPI
-	service *telegramService
+	service *services.Service
 }
 
-func NewVKHandler(bot *tgbotapi.BotAPI, service *telegramService) *handler {
+func NewTelegramHandler(bot *tgbotapi.BotAPI, service *services.Service) *handler {
 	return &handler{
 		bot:     bot,
 		service: service,
@@ -36,7 +37,7 @@ func (h *handler) Message() {
 		// Create a new MessageConfig. We don't have text yet,
 		// so we leave it empty.
 		if cmd, ok := command.GetCommands()[strings.ToLower(update.Message.Command())]; ok {
-			go cmd.Exec(update.Message, h.service)
+			go cmd.Exec(update.Message, *h.service)
 		}
 	}
 }

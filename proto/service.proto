@@ -2,13 +2,17 @@ syntax = "proto3";
 
 package server;
 
-import "proto/auth.proto";
-option go_package = "eu.suro/hyneo/protos/service";
+option go_package = "protos/service";
+
 
 service Service {
     rpc NotifyServer(NotifyServerRequest) returns (Empty) {}
     rpc Join(JoinRequest) returns (Empty) {}
     rpc CheckCode(CheckCodeRequest) returns (Empty) {}
+}
+
+message Empty {
+
 }
 
 message CheckCodeRequest {

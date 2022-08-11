@@ -8,9 +8,10 @@ import (
 )
 
 type Config struct {
-	MySQL    MySQL    `yaml:"mysql"`
-	GRPCPort string   `yaml:"grpc_port" env:"GRPC_PORT"`
-	VK       VKConfig `yaml:"vk"`
+	MySQL    MySQL          `yaml:"mysql"`
+	GRPCPort string         `yaml:"grpc_port" env:"GRPC_PORT"`
+	VK       VKConfig       `yaml:"vk"`
+	Telegram TelegramConfig `yaml:"telegram"`
 }
 
 type MySQL struct {
@@ -24,6 +25,10 @@ type MySQL struct {
 type VKConfig struct {
 	GroupID int64  `yaml:"group_id"`
 	Token   string `yaml:"token"`
+}
+
+type TelegramConfig struct {
+	Token string `yaml:"token"`
 }
 
 var instance *Config

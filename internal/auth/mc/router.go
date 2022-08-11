@@ -2,9 +2,9 @@ package mc
 
 import (
 	"context"
-	"hyneo/eu.suro/hyneo/protos/auth"
 	auth2 "hyneo/internal/auth"
 	"hyneo/pkg/mysql"
+	"hyneo/protos/auth"
 	"time"
 
 	"google.golang.org/protobuf/types/known/timestamppb"

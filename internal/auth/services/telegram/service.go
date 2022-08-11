@@ -18,8 +18,12 @@ type telegramService struct {
 	Code   code.CodeService
 }
 
-func NewTelegramService() services.Service {
-	return &telegramService{}
+func NewTelegramService(client *mysql.Client, bot *tgbotapi.BotAPI, Code code.CodeService) services.Service {
+	return &telegramService{
+		Client: *client,
+		bot:    bot,
+		Code:   Code,
+	}
 }
 
 func (s *telegramService) SendMessage(message string, messageObject interface{}) {
@@ -99,8 +103,8 @@ func (s *telegramService) BindAccount(message interface{}) error {
 	if err != nil {
 		return err
 	}
-	code := s.Code.CreateCode(mcuser.Username, int(tgID))
-	s.SendMessage("Зайдите в игру и введите код: /code "+code, message)
+	createCode := s.Code.CreateCode(mcuser.Username, int(tgID))
+	s.SendMessage("Зайдите в игру и введите код: /createCode "+createCode, message)
 	return nil
 }
 

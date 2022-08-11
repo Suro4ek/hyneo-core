@@ -4,13 +4,14 @@ import (
 	"errors"
 	"hyneo/internal/auth"
 	"hyneo/internal/auth/code"
+	"hyneo/internal/auth/services"
 	"hyneo/pkg/mysql"
 	"strings"
 
 	"github.com/SevereCloud/vksdk/api"
 	"github.com/SevereCloud/vksdk/api/params"
-	"github.com/SevereCloud/vksdk/object"
 	"github.com/SevereCloud/vksdk/v2/events"
+	"github.com/SevereCloud/vksdk/v2/object"
 )
 
 type VKService struct {
@@ -19,9 +20,13 @@ type VKService struct {
 	Code   code.CodeService
 }
 
-func (s *VKService) GetUser(vkID int) (*auth.VkUser, error) {
+func NewVkService() services.Service {
+	return &VKService{}
+}
+
+func (s *VKService) GetUser(vkID int) (user1 interface{}, err error) {
 	var user auth.VkUser
-	err := s.Client.DB.Model(&auth.VkUser{}).Where("vk_id = ?", vkID).First(&user).Error
+	err = s.Client.DB.Model(&auth.VkUser{}).Where("vk_id = ?", vkID).First(&user).Error
 	if err != nil {
 		return nil, err
 	}
@@ -37,12 +42,13 @@ func (s *VKService) GetMCUser(username string) (*auth.User, error) {
 	return &user, nil
 }
 
-func (s *VKService) BindAccount(message events.MessageNewObject) error {
-	length := strings.Split(message.Message.Text, " ")
+func (s *VKService) BindAccount(message interface{}) error {
+	messageVK := message.(events.MessageNewObject)
+	length := strings.Split(messageVK.Message.Text, " ")
 	if len(length) != 2 {
 		return errors.New("Помощь")
 	}
-	vkID := message.Message.FromID
+	vkID := messageVK.Message.FromID
 	_, err := s.GetUser(vkID)
 	if err != nil {
 		return err
@@ -52,7 +58,7 @@ func (s *VKService) BindAccount(message events.MessageNewObject) error {
 		return err
 	}
 	code := s.Code.CreateCode(mcuser.Username, vkID)
-	s.SendMessage("Зайдите в игру и введите код: /code "+code, message.Message.PeerID, message.Message.RandomID, nil)
+	s.SendMessage("Зайдите в игру и введите код: /code "+code, message)
 	return nil
 }
 
@@ -77,7 +83,9 @@ func (s *VKService) CheckCode(username string, code string) error {
 	return nil
 }
 
-func (s *VKService) UnBindAccount(vkId int) error {
+func (s *VKService) UnBindAccount(message interface{}) error {
+	messageVK := message.(events.MessageNewObject)
+	vkId := messageVK.Message.FromID
 	user, err := s.GetUser(vkId)
 	if err != nil {
 		return err
@@ -86,10 +94,7 @@ func (s *VKService) UnBindAccount(vkId int) error {
 	if err != nil {
 		return err
 	}
-	s.SendMessage("Вы успешно отвязали аккаунт", vkId, 0, &object.MessagesKeyboard{
-		Buttons: [][]object.MessagesKeyboardButton{},
-		OneTime: true,
-	})
+	s.clearKeyBoard("Вы успешно отвязали аккаунт", vkId, 0)
 	return nil
 }
 
@@ -113,13 +118,24 @@ func (s *VKService) Join(user_id string, ip string) error {
 	return nil
 }
 
-func (s *VKService) SendMessage(message string, peerID int, randomID int, keyboard *object.MessagesKeyboard) {
+func (s *VKService) SendMessage(message string, messageObject interface{}) {
+	messageVK := messageObject.(events.MessageNewObject)
+	m := params.NewMessagesSendBuilder()
+	m.Message(message)
+	m.PeerID(messageVK.Message.PeerID)
+	m.RandomID(messageVK.Message.RandomID)
+	s.Vk.MessagesSend(m.Params)
+}
+
+func (s *VKService) clearKeyBoard(message string, peerID int, randomID int) {
 	m := params.NewMessagesSendBuilder()
 	m.Message(message)
 	m.PeerID(peerID)
-	if keyboard != nil {
-		m.Keyboard(keyboard)
+	keyboard := &object.MessagesKeyboard{
+		Buttons: [][]object.MessagesKeyboardButton{},
+		OneTime: true,
 	}
+	m.Keyboard(keyboard)
 	m.RandomID(randomID)
 	s.Vk.MessagesSend(m.Params)
 }

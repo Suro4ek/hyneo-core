@@ -2,7 +2,7 @@ proto auth:
 	protoc --go_out=. \
                    --go-grpc_out=.  \
                    proto/auth.proto   
-proto vk:
+proto service:
 	protoc --go_out=. \
                    --go-grpc_out=. \
-                   proto/vk.proto  
+                   proto/service.proto  

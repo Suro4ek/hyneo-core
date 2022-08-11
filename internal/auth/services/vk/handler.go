@@ -1,8 +1,8 @@
-package command
+package vk
 
 import (
 	"context"
-	"hyneo/internal/auth/vk"
+	"hyneo/internal/auth/services/command"
 	"strings"
 
 	"github.com/SevereCloud/vksdk/v2/events"
@@ -11,10 +11,10 @@ import (
 
 type handler struct {
 	lp      *longpoll.LongPoll
-	service *vk.VKService
+	service *VKService
 }
 
-func NewVKHandler(lp *longpoll.LongPoll, service *vk.VKService) *handler {
+func NewVKHandler(lp *longpoll.LongPoll, service *VKService) *handler {
 	return &handler{
 		lp:      lp,
 		service: service,
@@ -25,7 +25,7 @@ func (h *handler) Message() {
 	h.lp.MessageNew(func(_ context.Context, m events.MessageNewObject) {
 		mstr := strings.TrimSpace(m.Message.Text)
 		marray := strings.Fields(mstr)
-		if cmd, ok := GetCommands()[strings.ToLower(marray[0])]; ok {
+		if cmd, ok := command.GetCommands()[strings.ToLower(marray[0])]; ok {
 			if cmd.Payload == -1 {
 				go cmd.Exec(m, h.service)
 			} else {

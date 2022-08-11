@@ -24,3 +24,13 @@ type VkUser struct {
 	UserID      int64 `json:"user_id"`
 	User        User
 }
+
+type TelegramUser struct {
+	ID          int64 `json:"id"`
+	TelegramID  int64 `json:"telegram_id"`
+	Notificated bool  `json:"notificated"`
+	Banned      bool  `json:"banned"`
+	DoubleAuth  bool  `json:"double_auth"`
+	UserID      int64 `json:"user_id"`
+	User        User
+}

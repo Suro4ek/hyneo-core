@@ -8,6 +8,7 @@ import (
 	service2 "hyneo/internal/auth/mc/service"
 	"hyneo/internal/auth/password"
 	"hyneo/internal/auth/services"
+	"hyneo/internal/auth/services/command"
 	"hyneo/internal/config"
 	"hyneo/pkg/logging"
 	"hyneo/pkg/mysql"
@@ -26,6 +27,7 @@ func main() {
 	client := mysql.NewClient(context.Background(), 5, cfg.MySQL)
 	codeService := code.CodeService{}
 	servicess := RunServices(cfg, codeService, client)
+	command.RegisterCommands()
 	runGRPCServer(servicess, *client, *cfg)
 	rand.Seed(time.Now().UnixNano())
 

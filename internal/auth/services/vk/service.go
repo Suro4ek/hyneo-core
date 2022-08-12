@@ -2,6 +2,7 @@ package vk
 
 import (
 	"errors"
+	"gorm.io/gorm"
 	"hyneo/internal/auth"
 	"hyneo/internal/auth/code"
 	"hyneo/internal/auth/services"
@@ -29,8 +30,17 @@ func NewVkService(Client *mysql.Client, VK *api.VK, Code code.CodeService) servi
 }
 
 func (s *VKService) GetUser(vkID int) (user1 interface{}, err error) {
-	var user auth.VkUser
-	err = s.Client.DB.Model(&auth.VkUser{}).Where("vk_id = ?", vkID).First(&user).Error
+	var user auth.LinkUser
+	err = s.Client.DB.Model(&auth.LinkUser{}).Where("vk_id = ?", vkID).First(&user).Error
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+func (s *VKService) GetUserID(userId int64) (user1 interface{}, err error) {
+	var user auth.LinkUser
+	err = s.Client.DB.Model(&auth.LinkUser{}).Where("user_id = ?", userId).First(&user).Error
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +60,7 @@ func (s *VKService) BindAccount(message interface{}) error {
 	messageVK := message.(events.MessageNewObject)
 	length := strings.Split(messageVK.Message.Text, " ")
 	if len(length) != 2 {
-		return errors.New("Помощь")
+		return services.HelpError
 	}
 	vkID := messageVK.Message.FromID
 	_, err := s.GetUser(vkID)
@@ -60,6 +70,12 @@ func (s *VKService) BindAccount(message interface{}) error {
 	mcuser, err := s.GetMCUser(length[1])
 	if err != nil {
 		return err
+	}
+	_, err = s.GetUserID(mcuser.ID)
+	if err != nil {
+		if !errors.As(err, &gorm.ErrRecordNotFound) {
+			return err
+		}
 	}
 	code := s.Code.CreateCode(mcuser.Username, vkID)
 	s.SendMessage("Зайдите в игру и введите код: /code "+code, message)
@@ -72,10 +88,10 @@ func (s *VKService) CheckCode(username string, code string) error {
 		return err
 	}
 	if !s.Code.CompareCode(username, code) {
-		return errors.New("Неверный код")
+		return services.InvalidCode
 	}
 	VkID := s.Code.GetCode(username)
-	vkUser := &auth.VkUser{
+	vkUser := &auth.LinkUser{
 		VkID: int64(VkID.VKId),
 		User: *user,
 	}
@@ -103,7 +119,7 @@ func (s *VKService) UnBindAccount(message interface{}) error {
 }
 
 func (s *VKService) NotifyServer(user_id string, server string) error {
-	var vkUser auth.VkUser
+	var vkUser auth.LinkUser
 	err := s.Client.DB.Joins("User", s.Client.DB.Where("id = ?", user_id)).First(&vkUser).Error
 	if err != nil {
 		return err
@@ -113,7 +129,7 @@ func (s *VKService) NotifyServer(user_id string, server string) error {
 }
 
 func (s *VKService) Join(user_id string, ip string) error {
-	var vkUser auth.VkUser
+	var vkUser auth.LinkUser
 	err := s.Client.DB.Joins("User", s.Client.DB.Where("id = ?", user_id)).First(&vkUser).Error
 	if err != nil {
 		return err

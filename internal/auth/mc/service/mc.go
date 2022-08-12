@@ -33,6 +33,7 @@ func (s *service) Login(username string, password string) error {
 		return fmt.Errorf("password is not correct")
 	}
 	user.Authorized = true
+	user.LastJoin = time.Now()
 	err = s.client.DB.Save(&user).Error
 	if err != nil {
 		return err
@@ -86,12 +87,19 @@ func (s *service) LastLogin(username string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return s.LetfTime(user.LastJoin), nil
+	return s.LeftTime(user.LastJoin), nil
 }
 
 func (s *service) GetUser(id string) (*auth.User, error) {
 	var user auth.User
 	err := s.client.DB.Model(&auth.User{}).Where("id = ?", id).First(&user).Error
+	if err != nil {
+		return nil, err
+	}
+	if user.Session.Sub(time.Now()) < 0 {
+		user.Authorized = false
+	}
+	err = s.client.DB.Save(&user).Error
 	if err != nil {
 		return nil, err
 	}
@@ -111,6 +119,6 @@ func (s *service) UnRegister(username string) error {
 	return nil
 }
 
-func (s *service) LetfTime(t time.Time) string {
+func (s *service) LeftTime(t time.Time) string {
 	return timediff.TimeDiff(t, timediff.WithLocale("ru-RU"))
 }

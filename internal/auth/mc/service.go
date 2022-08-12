@@ -13,5 +13,5 @@ type Service interface {
 	LastLogin(username string) (string, error)
 	GetUser(id string) (*auth.User, error)
 	UnRegister(username string) error
-	LetfTime(t time.Time) string
+	LeftTime(t time.Time) string
 }

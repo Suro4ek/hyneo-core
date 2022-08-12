@@ -24,7 +24,7 @@ func NewAuthRouter(client *mysql.Client, service Service) auth.AuthServer {
 }
 
 func (r *routerService) Login(ctx context.Context, res *auth.LoginRequest) (*auth.Empty, error) {
-	err := r.service.Login(res.User.Username, res.User.Password)
+	err := r.service.Login(res.User.Username, res.Password)
 	if err != nil {
 		return nil, err
 	}
@@ -34,9 +34,8 @@ func (r *routerService) Login(ctx context.Context, res *auth.LoginRequest) (*aut
 func (r *routerService) Register(ctx context.Context, res *auth.RegisterRequest) (*auth.Empty, error) {
 	err := r.service.Register(&auth2.User{
 		Username:     res.User.Username,
-		PasswordHash: res.User.Password,
+		PasswordHash: res.Password,
 		LastJoin:     time.Now(),
-		Lisense:      res.User.Lisense,
 		Authorized:   true,
 		Session:      time.Now().Add(24 * time.Hour),
 		IP:           res.User.Ip,
@@ -83,8 +82,7 @@ func (r *routerService) GetUser(ctx context.Context, res *auth.GetUserRequest) (
 	return &auth.GetUserResponse{
 		User: &auth.User{
 			Username:     user.Username,
-			LastLogin:    r.service.LetfTime(user.LastJoin),
-			Lisense:      user.Lisense,
+			LastLogin:    timestamppb.New(user.LastJoin),
 			Ip:           user.IP,
 			RegisteredIp: user.RegisteredIP,
 			LastServer:   user.LastServer,

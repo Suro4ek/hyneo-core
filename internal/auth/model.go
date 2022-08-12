@@ -11,22 +11,12 @@ type User struct {
 	Session      time.Time `json:"session"`
 	LastJoin     time.Time `json:"last_join"`
 	LastServer   string    `json:"last_server"`
-	Lisense      bool      `json:"license"`
 	Authorized   bool      `json:"authorized"`
 }
 
-type VkUser struct {
+type LinkUser struct {
 	ID          int64 `json:"id"`
 	VkID        int64 `json:"vk_id"`
-	Notificated bool  `json:"notificated"`
-	Banned      bool  `json:"banned"`
-	DoubleAuth  bool  `json:"double_auth"`
-	UserID      int64 `json:"user_id"`
-	User        User
-}
-
-type TelegramUser struct {
-	ID          int64 `json:"id"`
 	TelegramID  int64 `json:"telegram_id"`
 	Notificated bool  `json:"notificated"`
 	Banned      bool  `json:"banned"`

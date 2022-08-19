@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"google.golang.org/grpc"
+	auth2 "hyneo/internal/auth"
 	"hyneo/internal/auth/code"
 	"hyneo/internal/auth/mc"
 	service2 "hyneo/internal/auth/mc/service"
@@ -25,12 +26,18 @@ func main() {
 	_ = logging.GetLogger()
 	cfg := config.GetConfig()
 	client := mysql.NewClient(context.Background(), 5, cfg.MySQL)
+	migrate(client)
 	codeService := code.CodeService{}
 	servicess := RunServices(cfg, codeService, client)
 	command.RegisterCommands()
 	runGRPCServer(servicess, *client, *cfg)
 	rand.Seed(time.Now().UnixNano())
 
+}
+
+func migrate(client *mysql.Client) {
+	client.DB.AutoMigrate(&auth2.LinkUser{})
+	client.DB.AutoMigrate(&auth2.User{})
 }
 
 func runGRPCServer(servicess []services.Service, client mysql.Client, cfg config.Config) {

@@ -65,7 +65,9 @@ func (s *VKService) BindAccount(message interface{}) error {
 	vkID := messageVK.Message.FromID
 	_, err := s.GetUser(vkID)
 	if err != nil {
-		return err
+		if !errors.As(err, &gorm.ErrRecordNotFound) {
+			return err
+		}
 	}
 	mcuser, err := s.GetMCUser(length[1])
 	if err != nil {
@@ -165,12 +167,16 @@ func (s *VKService) SendKeyboard(message string, peerID int, randomID int) {
 	m.Message(message)
 	m.PeerID(peerID)
 	keyboard := object.NewMessagesKeyboard(false)
+	keyboard.AddRow()
 	keyboard.AddTextButton("Убрать клавиатуру", "6", "secondary")
+	keyboard.AddRow()
 	keyboard.AddTextButton("Статус", "4", "primary")
+	keyboard.AddRow()
 	keyboard.AddTextButton("Восстановить", "3", "positive")
 	keyboard.AddRow().AddTextButton("Уведомления", "2", "positive").
 		AddTextButton("Кикнуть", "1", "negative").
 		AddTextButton("Заблокировать", "7", "negative")
+	keyboard.AddRow()
 	keyboard.AddTextButton("Отвязать", "5", "negative")
 	m.Keyboard(keyboard)
 	m.RandomID(randomID)

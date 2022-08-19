@@ -1,21 +1,19 @@
 syntax = "proto3";
 
 package server;
+
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
 option go_package = "protos/auth/";
 
 service Auth {
-    rpc Login(LoginRequest) returns (Empty) {}
-    rpc Register(RegisterRequest) returns (Empty) {}
-    rpc ChangePassword(ChangePasswordRequest) returns (Empty) {}
-    rpc Logout(LogoutRequest) returns (Empty) {}
+    rpc Login(LoginRequest) returns (google.protobuf.Empty) {}
+    rpc Register(RegisterRequest) returns (google.protobuf.Empty) {}
+    rpc ChangePassword(ChangePasswordRequest) returns (google.protobuf.Empty) {}
+    rpc Logout(LogoutRequest) returns (google.protobuf.Empty) {}
     rpc LastLogin(LastLoginRequest) returns (LastLoginResponse) {}
     rpc GetUser(GetUserRequest) returns (GetUserResponse) {}
-    rpc UnRegister(UnRegisterRequest) returns (Empty) {}
-}
-
-message Empty {
-
+    rpc UnRegister(UnRegisterRequest) returns (google.protobuf.Empty) {}
 }
 
 message LoginRequest {

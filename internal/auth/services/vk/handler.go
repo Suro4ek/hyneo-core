@@ -26,7 +26,11 @@ func NewVKHandler(lp *longpoll.LongPoll, service *services.Service) *handler {
 func (h *handler) Message() {
 	h.lp.MessageNew(func(_ context.Context, m events.MessageNewObject) {
 		mstr := strings.TrimSpace(m.Message.Text)
+		if mstr == "" {
+			return
+		}
 		marray := strings.Fields(mstr)
+		log.Println(strings.ToLower(marray[0]))
 		if cmd, ok := command.GetCommands()[strings.ToLower(marray[0])]; ok {
 			if cmd.Payload == -1 {
 				go cmd.Exec(m, *h.service)

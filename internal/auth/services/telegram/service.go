@@ -100,7 +100,9 @@ func (s *telegramService) BindAccount(message interface{}) error {
 	tgID := messageTG.From.ID
 	_, err := s.GetUser(int(tgID))
 	if err != nil {
-		return err
+		if !errors.As(err, &gorm.ErrRecordNotFound) {
+			return err
+		}
 	}
 	mcuser, err := s.GetMCUser(length[1])
 	if err != nil {

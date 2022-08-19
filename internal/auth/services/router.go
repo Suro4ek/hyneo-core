@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"google.golang.org/protobuf/types/known/emptypb"
 	"hyneo/pkg/mysql"
 	"hyneo/protos/service"
 )
@@ -19,26 +20,26 @@ func NewServiceRouter(client mysql.Client, services []Service) service.ServiceSe
 	}
 }
 
-func (r *serviceRouter) NotifyServer(ctx context.Context, res *service.NotifyServerRequest) (*service.Empty, error) {
+func (r *serviceRouter) NotifyServer(ctx context.Context, res *service.NotifyServerRequest) (*emptypb.Empty, error) {
 	for _, s := range r.services {
 		_ = s.NotifyServer(res.UserId, res.Server)
 	}
-	return &service.Empty{}, nil
+	return &emptypb.Empty{}, nil
 }
 
-func (r *serviceRouter) Join(ctx context.Context, res *service.JoinRequest) (*service.Empty, error) {
+func (r *serviceRouter) Join(ctx context.Context, res *service.JoinRequest) (*emptypb.Empty, error) {
 	for _, s := range r.services {
 		_ = s.Join(res.UserId, res.Ip)
 	}
-	return &service.Empty{}, nil
+	return &emptypb.Empty{}, nil
 }
 
-func (r *serviceRouter) CheckCode(ctx context.Context, res *service.CheckCodeRequest) (*service.Empty, error) {
+func (r *serviceRouter) CheckCode(ctx context.Context, res *service.CheckCodeRequest) (*emptypb.Empty, error) {
 	for _, s := range r.services {
 		err := s.CheckCode(res.Username, res.Code)
 		if err != nil {
-			return &service.Empty{}, err
+			return &emptypb.Empty{}, err
 		}
 	}
-	return &service.Empty{}, nil
+	return &emptypb.Empty{}, nil
 }

@@ -1,0 +1,12 @@
+mysql:
+  host: 192.168.0.8
+  port: 3306
+  user: root
+  pass: example
+  db: example
+grpc_port: 9000
+vk:
+  group_id: 215446134
+  token: vk1.a.BWlQ9Nn9erPa9TijTyqKEAyEJXwpWEzM_lKN0kg-DYBIl1qz2DtuO-Hl71caXbPTOEdG1Pkcf5SgVA1R_vfcS9Sg7RPTTlS44rY3_KeiHcwFBmHogEKRr1iJqfScD91qXShusWQSYEg-ybIm2ANHwXkXcajxDvmDdO70KMpCJ3IWm5ko4lCy_vBEVHzmP8h4
+telegram:
+  token: 5624813584:AAE-q1tvLGNiWBiJxOia_ncijY9fbQIgqoc

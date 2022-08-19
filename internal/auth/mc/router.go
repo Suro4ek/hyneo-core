@@ -2,6 +2,7 @@ package mc
 
 import (
 	"context"
+	"google.golang.org/protobuf/types/known/emptypb"
 	auth2 "hyneo/internal/auth"
 	"hyneo/pkg/mysql"
 	"hyneo/protos/auth"
@@ -23,15 +24,15 @@ func NewAuthRouter(client *mysql.Client, service Service) auth.AuthServer {
 	}
 }
 
-func (r *routerService) Login(ctx context.Context, res *auth.LoginRequest) (*auth.Empty, error) {
+func (r *routerService) Login(ctx context.Context, res *auth.LoginRequest) (*emptypb.Empty, error) {
 	err := r.service.Login(res.User.Username, res.Password)
 	if err != nil {
 		return nil, err
 	}
-	return &auth.Empty{}, nil
+	return &emptypb.Empty{}, nil
 }
 
-func (r *routerService) Register(ctx context.Context, res *auth.RegisterRequest) (*auth.Empty, error) {
+func (r *routerService) Register(ctx context.Context, res *auth.RegisterRequest) (*emptypb.Empty, error) {
 	err := r.service.Register(&auth2.User{
 		Username:     res.User.Username,
 		PasswordHash: res.Password,
@@ -45,23 +46,23 @@ func (r *routerService) Register(ctx context.Context, res *auth.RegisterRequest)
 	if err != nil {
 		return nil, err
 	}
-	return &auth.Empty{}, nil
+	return &emptypb.Empty{}, nil
 }
 
-func (r *routerService) ChangePassword(ctx context.Context, res *auth.ChangePasswordRequest) (*auth.Empty, error) {
+func (r *routerService) ChangePassword(ctx context.Context, res *auth.ChangePasswordRequest) (*emptypb.Empty, error) {
 	err := r.service.ChangePassword(res.Username, res.OldPassword, res.NewPassword)
 	if err != nil {
 		return nil, err
 	}
-	return &auth.Empty{}, nil
+	return &emptypb.Empty{}, nil
 }
 
-func (r *routerService) Logout(ctx context.Context, res *auth.LogoutRequest) (*auth.Empty, error) {
+func (r *routerService) Logout(ctx context.Context, res *auth.LogoutRequest) (*emptypb.Empty, error) {
 	err := r.service.Logout(res.Username)
 	if err != nil {
 		return nil, err
 	}
-	return &auth.Empty{}, nil
+	return &emptypb.Empty{}, nil
 }
 
 func (r *routerService) LastLogin(ctx context.Context, res *auth.LastLoginRequest) (*auth.LastLoginResponse, error) {
@@ -92,10 +93,10 @@ func (r *routerService) GetUser(ctx context.Context, res *auth.GetUserRequest) (
 	}, nil
 }
 
-func (r *routerService) UnRegister(ctx context.Context, res *auth.UnRegisterRequest) (*auth.Empty, error) {
+func (r *routerService) UnRegister(ctx context.Context, res *auth.UnRegisterRequest) (*emptypb.Empty, error) {
 	err := r.service.UnRegister(res.Username)
 	if err != nil {
 		return nil, err
 	}
-	return &auth.Empty{}, nil
+	return &emptypb.Empty{}, nil
 }

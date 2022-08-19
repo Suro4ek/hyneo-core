@@ -34,12 +34,14 @@ func runVKLongServer(Client *mysql.Client, cfg *config.Config, code code.CodeSer
 	}
 
 	// Initializing Long Poll
-	lp, err := longpoll.NewLongPoll(vk, group[0].ID)
-	if err != nil {
-		log.Fatal(err)
-	}
-	handler := vk2.NewVKHandler(lp, &service)
-	handler.Message()
+	go func() {
+		lp, err := longpoll.NewLongPoll(vk, group[0].ID)
+		if err != nil {
+			log.Fatal(err)
+		}
+		handler := vk2.NewVKHandler(lp, &service)
+		handler.Message()
+	}()
 	return service
 }
 
@@ -54,7 +56,9 @@ func runTGServer(Client *mysql.Client, cfg *config.Config, code code.CodeService
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 
 	service := telegram.NewTelegramService(Client, bot, code)
-	handler := telegram.NewTelegramHandler(bot, &service)
-	handler.Message()
+	go func() {
+		handler := telegram.NewTelegramHandler(bot, &service)
+		handler.Message()
+	}()
 	return service
 }

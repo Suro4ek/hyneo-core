@@ -2,18 +2,17 @@ syntax = "proto3";
 
 package server;
 
+import "google/protobuf/empty.proto";
+
 option go_package = "protos/service";
 
 
 service Service {
-    rpc NotifyServer(NotifyServerRequest) returns (Empty) {}
-    rpc Join(JoinRequest) returns (Empty) {}
-    rpc CheckCode(CheckCodeRequest) returns (Empty) {}
+    rpc NotifyServer(NotifyServerRequest) returns (google.protobuf.Empty) {}
+    rpc Join(JoinRequest) returns (google.protobuf.Empty) {}
+    rpc CheckCode(CheckCodeRequest) returns (google.protobuf.Empty) {}
 }
 
-message Empty {
-
-}
 
 message CheckCodeRequest {
     string code = 1;

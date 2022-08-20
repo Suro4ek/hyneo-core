@@ -18,10 +18,10 @@ import (
 type VKService struct {
 	Client mysql.Client
 	Vk     *api.VK
-	Code   code.CodeService
+	Code   code.Service
 }
 
-func NewVkService(Client *mysql.Client, VK *api.VK, Code code.CodeService) services.Service {
+func NewVkService(Client *mysql.Client, VK *api.VK, Code code.Service) services.Service {
 	return &VKService{
 		Client: *Client,
 		Vk:     VK,

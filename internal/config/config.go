@@ -12,6 +12,7 @@ type Config struct {
 	GRPCPort string         `yaml:"grpc_port" env:"GRPC_PORT"`
 	VK       VKConfig       `yaml:"vk"`
 	Telegram TelegramConfig `yaml:"telegram"`
+	Redis    Redis          `yaml:"redis"`
 }
 
 type MySQL struct {
@@ -20,6 +21,12 @@ type MySQL struct {
 	User     string `yaml:"user"`
 	Password string `yaml:"pass"`
 	DB       string `yaml:"db"`
+}
+
+type Redis struct {
+	Host string `yaml:"host"`
+	Port string `yaml:"port"`
+	Pass string `yaml:"pass"`
 }
 
 type VKConfig struct {

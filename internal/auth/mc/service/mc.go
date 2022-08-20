@@ -1,7 +1,8 @@
 package service
 
 import (
-	"fmt"
+	codes "google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"hyneo/internal/auth"
 	"hyneo/internal/auth/mc"
 	"hyneo/internal/auth/password"
@@ -15,6 +16,10 @@ type service struct {
 	client   *mysql.Client
 	pservice password.PasswordService
 }
+
+var (
+	IncorrectPassword = status.New(codes.Unauthenticated, "incorrect password").Err()
+)
 
 func NewMCService(client *mysql.Client, pservice password.PasswordService) mc.Service {
 	return &service{
@@ -30,7 +35,7 @@ func (s *service) Login(username string, password string) error {
 		return err
 	}
 	if !s.pservice.ComparePassword(user.PasswordHash, password) {
-		return fmt.Errorf("password is not correct")
+		return IncorrectPassword
 	}
 	user.Authorized = true
 	user.LastJoin = time.Now()
@@ -57,7 +62,7 @@ func (s *service) ChangePassword(username string, old_password string, new_passw
 		return err
 	}
 	if !s.pservice.ComparePassword(user.PasswordHash, old_password) {
-		return fmt.Errorf("password is not correct")
+		return IncorrectPassword
 	}
 	user.PasswordHash = s.pservice.CreatePassword(new_password)
 	err = s.client.DB.Save(&user).Error

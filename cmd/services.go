@@ -13,14 +13,14 @@ import (
 	"log"
 )
 
-func RunServices(cfg *config.Config, service code.CodeService, client *mysql.Client) []services.Service {
+func RunServices(cfg *config.Config, service code.Service, client *mysql.Client) []services.Service {
 	servicess := make([]services.Service, 0)
 	servicess = append(servicess, runVKLongServer(client, cfg, service))
 	servicess = append(servicess, runTGServer(client, cfg, service))
 	return servicess
 }
 
-func runVKLongServer(Client *mysql.Client, cfg *config.Config, code code.CodeService) services.Service {
+func runVKLongServer(Client *mysql.Client, cfg *config.Config, code code.Service) services.Service {
 	token := cfg.VK.Token // use os.Getenv("TOKEN")
 	vk := api.NewVK(token)
 
@@ -45,7 +45,7 @@ func runVKLongServer(Client *mysql.Client, cfg *config.Config, code code.CodeSer
 	return service
 }
 
-func runTGServer(Client *mysql.Client, cfg *config.Config, code code.CodeService) services.Service {
+func runTGServer(Client *mysql.Client, cfg *config.Config, code code.Service) services.Service {
 	bot, err := tgbotapi.NewBotAPI(cfg.Telegram.Token)
 	if err != nil {
 		log.Panic(err)

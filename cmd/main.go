@@ -13,6 +13,7 @@ import (
 	"hyneo/internal/config"
 	"hyneo/pkg/logging"
 	"hyneo/pkg/mysql"
+	"hyneo/pkg/redis"
 	"hyneo/protos/auth"
 	serviceRouter "hyneo/protos/service"
 	"log"
@@ -23,11 +24,17 @@ import (
 
 func main() {
 	logging.Init()
-	_ = logging.GetLogger()
+	logger := logging.GetLogger()
 	cfg := config.GetConfig()
 	client := mysql.NewClient(context.Background(), 5, cfg.MySQL)
+	redisClient, err := redis.NewClient(context.Background(), cfg.Redis)
+	if err != nil {
+		logger.Fatal(err)
+	}
 	migrate(client)
-	codeService := code.CodeService{}
+	codeService := code.Service{
+		Client: redisClient,
+	}
 	servicess := RunServices(cfg, codeService, client)
 	command.RegisterCommands()
 	runGRPCServer(servicess, *client, *cfg)

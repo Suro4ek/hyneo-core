@@ -1,49 +1,66 @@
 package code
 
 import (
+	"context"
+	"github.com/go-redis/redis/v9"
 	"math/rand"
+	"time"
 )
 
-type CodeService struct {
+type Service struct {
+	Client *redis.Client
 }
 
-type CodeUser struct {
-	VKId int
-	Code string
+type User struct {
+	VKId int    `redis:"vk_id"`
+	Code string `redis:"code"`
 }
 
-var codes = make(map[string]CodeUser, 0)
+//TODO error handler all function
 
-func (c *CodeService) CreateCode(username string, userId int) string {
+func (c *Service) CreateCode(username string, userId int) string {
 	code := c.RandStringRunes(6)
-	codes[username] = CodeUser{
-		VKId: userId,
-		Code: code,
+	ctx := context.Background()
+	if _, err := c.Client.Pipelined(ctx, func(rdb redis.Pipeliner) error {
+		rdb.HSet(ctx, "code:"+username, "vk_id", userId)
+		rdb.HSet(ctx, "code:"+username, "code", code)
+		return nil
+	}); err != nil {
+		//log error
 	}
+	c.Client.Expire(ctx, "code:"+username, time.Minute*15)
 	return code
 }
 
-func (c *CodeService) CompareCode(username string, code string) bool {
-	if _, ok := codes[username]; !ok {
+func (c *Service) CompareCode(username string, code string) bool {
+	var user User
+	err := c.Client.HGetAll(context.Background(), "code:"+username).Scan(&user)
+	if err != nil {
 		return false
 	}
-	if codes[username].Code == code {
+	if user.Code == code {
 		return true
 	}
 	return false
 }
 
-func (c *CodeService) GetCode(username string) CodeUser {
-	return codes[username]
+func (c *Service) GetCode(username string) User {
+	var user User
+	err := c.Client.HGetAll(context.Background(), "code:"+username).Scan(&user)
+	if err != nil {
+		return User{}
+	}
+	return user
 }
 
-func (c *CodeService) RemoveCode(username string) {
-	delete(codes, username)
+func (c *Service) RemoveCode(username string) {
+	ctx := context.Background()
+	c.Client.Del(ctx, "code:"+username)
 }
 
 var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
-func (c *CodeService) RandStringRunes(n int) string {
+func (c *Service) RandStringRunes(n int) string {
 	b := make([]rune, n)
 	for i := range b {
 		b[i] = letterRunes[rand.Intn(len(letterRunes))]

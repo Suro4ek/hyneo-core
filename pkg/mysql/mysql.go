@@ -33,7 +33,7 @@ func NewClient(ctx context.Context, maxAttemps int, sc config.MySQL) (client *Cl
 	}, maxAttemps, 5*time.Second)
 
 	if err != nil {
-		log.Fatal("error to connect in MySQL max attemtps")
+		log.Fatal("error to connect in MySQL max attempts")
 	}
 	return &Client{
 		DB:    pool,

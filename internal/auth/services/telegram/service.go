@@ -15,10 +15,10 @@ import (
 type telegramService struct {
 	bot    *tgbotapi.BotAPI
 	Client mysql.Client
-	Code   code.CodeService
+	Code   code.Service
 }
 
-func NewTelegramService(client *mysql.Client, bot *tgbotapi.BotAPI, Code code.CodeService) services.Service {
+func NewTelegramService(client *mysql.Client, bot *tgbotapi.BotAPI, Code code.Service) services.Service {
 	return &telegramService{
 		Client: *client,
 		bot:    bot,

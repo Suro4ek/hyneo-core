@@ -1,8 +1,12 @@
 package services
 
-import "errors"
+import (
+	"errors"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+)
 
 var (
 	HelpError   = errors.New("need help")
-	InvalidCode = errors.New("invalid code")
+	InvalidCode = status.Newf(codes.NotFound, "invalid code")
 )

@@ -5,7 +5,8 @@ import (
 )
 
 type Command struct {
-	Name    string `json:"name"`
-	Payload int    `json:"payload"`
-	Exec    func(message interface{}, service services.Service)
+	Name    string   `json:"name"`
+	Payload string   `json:"payload"`
+	Alias   []string `json:"alias"`
+	Exec    func(message interface{}, userid string, service services.Service)
 }

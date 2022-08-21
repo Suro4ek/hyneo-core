@@ -9,6 +9,9 @@ func RegisterCommand(command *Command) {
 func RegisterCommands() {
 	RegisterCommand(Bind)
 	RegisterCommand(UnBind)
+	RegisterCommand(Account)
+	RegisterCommand(ClearKeyboard)
+	RegisterCommand(Accounts)
 }
 
 func GetCommands() map[string]*Command {

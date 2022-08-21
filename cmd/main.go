@@ -17,9 +17,7 @@ import (
 	"hyneo/protos/auth"
 	serviceRouter "hyneo/protos/service"
 	"log"
-	"math/rand"
 	"net"
-	"time"
 )
 
 func main() {
@@ -38,8 +36,6 @@ func main() {
 	servicess := RunServices(cfg, codeService, client)
 	command.RegisterCommands()
 	runGRPCServer(servicess, *client, *cfg)
-	rand.Seed(time.Now().UnixNano())
-
 }
 
 func migrate(client *mysql.Client) {

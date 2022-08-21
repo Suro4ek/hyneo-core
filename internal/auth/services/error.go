@@ -7,6 +7,9 @@ import (
 )
 
 var (
-	HelpError   = errors.New("need help")
-	InvalidCode = status.Newf(codes.NotFound, "invalid code")
+	HelpError     = errors.New("need help")
+	ExistsCode    = errors.New("exists code")
+	AlreadyBinded = errors.New("already binded")
+	MaxAccount    = errors.New("max account")
+	InvalidCode   = status.New(codes.NotFound, "invalid code").Err()
 )

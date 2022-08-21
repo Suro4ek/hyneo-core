@@ -2,6 +2,7 @@ package vk
 
 import (
 	"context"
+	"fmt"
 	"hyneo/internal/auth/services"
 	"hyneo/internal/auth/services/command"
 	"log"
@@ -30,13 +31,14 @@ func (h *handler) Message() {
 			return
 		}
 		marray := strings.Fields(mstr)
-		log.Println(strings.ToLower(marray[0]))
-		if cmd, ok := command.GetCommands()[strings.ToLower(marray[0])]; ok {
-			if cmd.Payload == -1 {
-				go cmd.Exec(m, *h.service)
-			} else {
-				if cmd.Payload == m.Message.PeerID {
-					go cmd.Exec(m, *h.service)
+		fmt.Println(strings.ReplaceAll(m.Message.Payload, "\"", ""))
+		cmd, userId := h.GetCommandByPayload(strings.ReplaceAll(m.Message.Payload, "\"", ""))
+		if cmd != nil {
+			go cmd.Exec(m, userId, *h.service)
+		} else {
+			if cmd, ok := command.GetCommands()[strings.ToLower(marray[0])]; ok {
+				if cmd.Payload == "-1" {
+					go cmd.Exec(m, "", *h.service)
 				}
 			}
 		}
@@ -45,5 +47,13 @@ func (h *handler) Message() {
 	if err := h.lp.Run(); err != nil {
 		log.Fatal(err)
 	}
+}
 
+func (h *handler) GetCommandByPayload(payload string) (cmd *command.Command, userId string) {
+	for _, cmd := range command.GetCommands() {
+		if strings.HasPrefix(payload, cmd.Payload) {
+			return cmd, strings.TrimSpace(payload[len(cmd.Payload):])
+		}
+	}
+	return nil, ""
 }

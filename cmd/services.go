@@ -24,7 +24,7 @@ func runVKLongServer(Client *mysql.Client, cfg *config.Config, code code.Service
 	token := cfg.VK.Token // use os.Getenv("TOKEN")
 	vk := api.NewVK(token)
 
-	service := vk2.NewVkService(Client, vk, code)
+	service := vk2.NewVkService(Client, vk, code, 0)
 	// get information about the group
 	group, err := vk.GroupsGetByID(api.Params{
 		"group_id": cfg.VK.GroupID,
@@ -55,7 +55,7 @@ func runTGServer(Client *mysql.Client, cfg *config.Config, code code.Service) se
 
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 
-	service := telegram.NewTelegramService(Client, bot, code)
+	service := telegram.NewTelegramService(Client, bot, code, 1)
 	go func() {
 		handler := telegram.NewTelegramHandler(bot, &service)
 		handler.Message()

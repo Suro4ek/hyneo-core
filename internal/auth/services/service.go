@@ -6,21 +6,18 @@ import (
 	"hyneo/pkg/mysql"
 )
 
-//TODO команды отдельно реализацию, оставить только не команды и клавиатуры и т.д для сервисов
+// TODO команды отдельно реализацию, оставить только не команды и клавиатуры и т.д для сервисов
 type Service interface {
 	SendMessage(message string, chatID int64)
-	SendKeyboard(message string, messageObject interface{})
-	AccountKeyboard(messageObject interface{}, userId string)
+	SendKeyboard(message string, chatID int64)
+	AccountKeyboard(message string, chatID int64, userID int64)
 	ClearKeyboard(message string, chatID int64)
 
 	GetUser(ID int64) (user []auth.LinkUser, err error)
-	NotifyServer(userId string, server string) error
-	Join(userId string, ip string) error
 	GetMessage(messageObject interface{}) (message Message)
 	GetMCUser(username string) (*auth.User, error)
 	GetUserID(userId int64) (user *auth.LinkUser, err error)
 	GetService() (service *GetService)
-	CheckCode(username string, code string) error
 	//BindAccount(messageObject interface{}) error
 
 	//UnBindAccount(messageObject interface{}, userId string) error

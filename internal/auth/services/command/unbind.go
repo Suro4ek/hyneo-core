@@ -2,17 +2,15 @@ package command
 
 import (
 	"hyneo/internal/auth/services"
-	"strconv"
 )
 
 var UnBind = &Command{
 	Name:    "отвязать",
 	Payload: "unlink",
 	Alias:   []string{"unlink"},
-	Exec: func(message interface{}, userId string, service services.Service) {
+	Exec: func(message interface{}, userId int64, service services.Service) {
 		msg := service.GetMessage(message)
-		userIdInt, _ := strconv.Atoi(userId)
-		user, err := service.GetUserID(int64(userIdInt))
+		user, err := service.GetUserID(userId)
 		if err != nil {
 			service.SendMessage("Не удалось отвязать аккаунт", msg.ChatID)
 			return

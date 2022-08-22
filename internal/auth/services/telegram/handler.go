@@ -1,9 +1,9 @@
 package telegram
 
 import (
-	"fmt"
 	"hyneo/internal/auth/services"
 	"hyneo/internal/auth/services/command"
+	"strconv"
 	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -34,11 +34,11 @@ func (h *handler) Message() {
 			}
 			if update.Message.IsCommand() {
 				if cmd, ok := command.GetCommands()[strings.ToLower(update.Message.Command())]; ok {
-					go cmd.Exec(update.Message, "", *h.service)
+					go cmd.Exec(update.Message, 0, *h.service)
 				} else {
 					cmd := h.GetCommand(update.Message.Command())
 					if cmd != nil {
-						go cmd.Exec(update.Message, "", *h.service)
+						go cmd.Exec(update.Message, 0, *h.service)
 					}
 				}
 			}
@@ -48,16 +48,16 @@ func (h *handler) Message() {
 			if err != nil {
 				return
 			}
-			cmd, user_id := h.GetCommandByPayload(update.CallbackQuery.Data)
-			fmt.Println(user_id)
+			cmd, userId := h.GetCommandByPayload(update.CallbackQuery.Data)
+			userIdInt, _ := strconv.ParseInt(userId, 10, 64)
 			if cmd != nil {
-				go cmd.Exec(update.CallbackQuery.Message, user_id, *h.service)
+				go cmd.Exec(update.CallbackQuery.Message, userIdInt, *h.service)
 			}
 		}
 	}
 }
 
-//get command by command payload prefix
+// get command by command payload prefix
 func (h *handler) GetCommandByPayload(payload string) (cmd *command.Command, userId string) {
 	for _, cmd := range command.GetCommands() {
 		if strings.HasPrefix(payload, cmd.Payload) {

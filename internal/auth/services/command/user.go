@@ -2,19 +2,18 @@ package command
 
 import (
 	"hyneo/internal/auth/services"
-	"strconv"
 )
 
 var Account = &Command{
 	Name:    "аккаунт",
 	Payload: "user",
-	Exec: func(message interface{}, userId string, service services.Service) {
+	Exec: func(message interface{}, userId int64, service services.Service) {
 		msg := service.GetMessage(message)
-		userIdInt, _ := strconv.Atoi(userId)
-		user, err := service.GetUserID(int64(userIdInt))
-		if err != nil {
-			service.SendMessage("Не удалось отвязать аккаунт", msg.ChatID)
+		user, err := service.GetUserID(userId)
+		if err != nil || user == nil {
+			service.ClearKeyboard("Вы не привязаны к аккаунт", msg.ChatID)
 			return
 		}
+		service.AccountKeyboard("Настройки аккаунта "+user.User.Username, msg.ChatID, userId)
 	},
 }

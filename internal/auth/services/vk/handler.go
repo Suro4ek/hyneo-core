@@ -6,6 +6,7 @@ import (
 	"hyneo/internal/auth/services"
 	"hyneo/internal/auth/services/command"
 	"log"
+	"strconv"
 	"strings"
 
 	"github.com/SevereCloud/vksdk/v2/events"
@@ -34,11 +35,12 @@ func (h *handler) Message() {
 		fmt.Println(strings.ReplaceAll(m.Message.Payload, "\"", ""))
 		cmd, userId := h.GetCommandByPayload(strings.ReplaceAll(m.Message.Payload, "\"", ""))
 		if cmd != nil {
-			go cmd.Exec(m, userId, *h.service)
+			userIdInt, _ := strconv.ParseInt(userId, 10, 64)
+			go cmd.Exec(m, userIdInt, *h.service)
 		} else {
 			if cmd, ok := command.GetCommands()[strings.ToLower(marray[0])]; ok {
 				if cmd.Payload == "-1" {
-					go cmd.Exec(m, "", *h.service)
+					go cmd.Exec(m, 0, *h.service)
 				}
 			}
 		}

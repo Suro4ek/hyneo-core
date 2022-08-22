@@ -30,7 +30,7 @@ func main() {
 		logger.Fatal(err)
 	}
 	migrate(client)
-	codeService := code.Service{
+	codeService := &code.Service{
 		Client: redisClient,
 	}
 	servicess := RunServices(cfg, codeService, client)

@@ -33,14 +33,20 @@ func main() {
 	codeService := &code.Service{
 		Client: redisClient,
 	}
-	servicess := RunServices(cfg, codeService, client)
+	runServices := RunServices(cfg, codeService, client)
 	command.RegisterCommands()
-	runGRPCServer(servicess, *client, *cfg)
+	runGRPCServer(runServices, *client, *cfg)
 }
 
 func migrate(client *mysql.Client) {
-	client.DB.AutoMigrate(&auth2.LinkUser{})
-	client.DB.AutoMigrate(&auth2.User{})
+	err := client.DB.AutoMigrate(&auth2.LinkUser{})
+	if err != nil {
+		return
+	}
+	err = client.DB.AutoMigrate(&auth2.User{})
+	if err != nil {
+		return
+	}
 }
 
 func runGRPCServer(servicess []services.Service, client mysql.Client, cfg config.Config) {

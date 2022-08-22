@@ -13,7 +13,6 @@ service Service {
     rpc CheckCode(CheckCodeRequest) returns (google.protobuf.Empty) {}
 }
 
-
 message CheckCodeRequest {
     string code = 1;
     string username = 2;

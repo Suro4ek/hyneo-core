@@ -7,8 +7,8 @@ import "google/protobuf/empty.proto";
 option go_package = "protos/auth/";
 
 service Auth {
-    rpc Login(LoginRequest) returns (google.protobuf.Empty) {}
-    rpc Register(RegisterRequest) returns (google.protobuf.Empty) {}
+    rpc Login(LoginRequest) returns (User) {}
+    rpc Register(RegisterRequest) returns (User) {}
     rpc ChangePassword(ChangePasswordRequest) returns (google.protobuf.Empty) {}
     rpc Logout(LogoutRequest) returns (google.protobuf.Empty) {}
     rpc LastLogin(LastLoginRequest) returns (LastLoginResponse) {}

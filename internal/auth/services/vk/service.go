@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/SevereCloud/vksdk/v2/api"
 	"github.com/SevereCloud/vksdk/v2/api/params"
+	"github.com/SevereCloud/vksdk/v2/events"
 	"github.com/SevereCloud/vksdk/v2/object"
 	"hyneo/internal/auth"
 	"hyneo/internal/auth/code"
@@ -29,10 +30,10 @@ func NewVkService(Client *mysql.Client, VK *api.VK, Code *code.Service, ServiceI
 }
 
 func (s *Service) GetMessage(messageObject interface{}) services.Message {
-	message := messageObject.(*object.MessagesMessage)
+	message := messageObject.(events.MessageNewObject)
 	return services.Message{
-		Text:   message.Text,
-		ChatID: int64(message.PeerID),
+		Text:   message.Message.Text,
+		ChatID: int64(message.Message.PeerID),
 	}
 }
 
@@ -58,7 +59,9 @@ func (s *Service) GetUser(ID int64) (user1 []auth.LinkUser, err error) {
 
 func (s *Service) GetUserID(userId int64) (user1 *auth.LinkUser, err error) {
 	var user auth.LinkUser
-	err = s.Client.DB.Model(&auth.LinkUser{}).Where("user_id = ?", userId).First(&user).Error
+	err = s.Client.DB.Model(&auth.LinkUser{}).Joins("User").Where(auth.LinkUser{
+		UserID: userId,
+	}).Find(&user).Error
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +82,10 @@ func (s *Service) SendMessage(message string, chadID int64) {
 	m.Message(message)
 	m.PeerID(int(chadID))
 	m.RandomID(0)
-	s.Vk.MessagesSend(m.Params)
+	_, err := s.Vk.MessagesSend(m.Params)
+	if err != nil {
+		return
+	}
 }
 
 func (s *Service) ClearKeyboard(message string, chadID int64) {
@@ -92,13 +98,14 @@ func (s *Service) ClearKeyboard(message string, chadID int64) {
 	}
 	m.Keyboard(keyboard)
 	m.RandomID(0)
-	s.Vk.MessagesSend(m.Params)
+	_, err := s.Vk.MessagesSend(m.Params)
+	if err != nil {
+		return
+	}
 }
 
 func (s *Service) SoloUserKeyBoard(userID int64) *object.MessagesKeyboard {
 	keyboard := object.NewMessagesKeyboard(false)
-	keyboard.AddRow()
-	keyboard.AddTextButton("Убрать клавиатуру", "clear_keyboard", "secondary")
 	keyboard.AddRow()
 	keyboard.AddTextButton("Статус", fmt.Sprintf("status %d", userID), "primary")
 	keyboard.AddRow()
@@ -119,7 +126,10 @@ func (s *Service) AccountKeyboard(message string, chatID int64, userID int64) {
 	m.PeerID(int(chatID))
 	m.Keyboard(keyboard)
 	m.RandomID(0)
-	s.Vk.MessagesSend(m.Params)
+	_, err := s.Vk.MessagesSend(m.Params)
+	if err != nil {
+		return
+	}
 }
 
 func (s *Service) SendKeyboard(message string, ChatID int64) {

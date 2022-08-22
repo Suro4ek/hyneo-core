@@ -2,7 +2,6 @@ package vk
 
 import (
 	"context"
-	"fmt"
 	"hyneo/internal/auth/services"
 	"hyneo/internal/auth/services/command"
 	"log"
@@ -32,7 +31,6 @@ func (h *handler) Message() {
 			return
 		}
 		marray := strings.Fields(mstr)
-		fmt.Println(strings.ReplaceAll(m.Message.Payload, "\"", ""))
 		cmd, userId := h.GetCommandByPayload(strings.ReplaceAll(m.Message.Payload, "\"", ""))
 		if cmd != nil {
 			userIdInt, _ := strconv.ParseInt(userId, 10, 64)

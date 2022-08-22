@@ -57,7 +57,6 @@ func (h *handler) Message() {
 	}
 }
 
-// get command by command payload prefix
 func (h *handler) GetCommandByPayload(payload string) (cmd *command.Command, userId string) {
 	for _, cmd := range command.GetCommands() {
 		if strings.HasPrefix(payload, cmd.Payload) {

@@ -27,7 +27,10 @@ func NewTelegramService(client *mysql.Client, bot *tgbotapi.BotAPI, Code *code.S
 
 func (s *telegramService) SendMessage(message string, chatID int64) {
 	msg := tgbotapi.NewMessage(chatID, message)
-	s.bot.Send(msg)
+	_, err := s.bot.Send(msg)
+	if err != nil {
+		return
+	}
 }
 
 func (s *telegramService) GetService() *services.GetService {
@@ -79,6 +82,7 @@ func (s *telegramService) GetMessage(messageObject interface{}) services.Message
 }
 
 func (s *telegramService) ClearKeyboard(message string, chatID int64) {
+	s.SendMessage(message, chatID)
 }
 
 func (s *telegramService) AccountKeyboard(message string, chatID int64, userID int64) {
@@ -89,7 +93,10 @@ func (s *telegramService) AccountKeyboard(message string, chatID int64, userID i
 			tgbotapi.NewInlineKeyboardButtonData("Назад", "accounts"),
 		))
 	msg.ReplyMarkup = keyboard
-	s.bot.Send(msg)
+	_, err := s.bot.Send(msg)
+	if err != nil {
+		return
+	}
 }
 
 func (s *telegramService) SoloUserKeyBoard(userId int64) tgbotapi.InlineKeyboardMarkup {
@@ -130,5 +137,8 @@ func (s *telegramService) SendKeyboard(message string, chatId int64) {
 	}
 	msg := tgbotapi.NewMessage(chatId, message)
 	msg.ReplyMarkup = numericKeyboard
-	s.bot.Send(msg)
+	_, err := s.bot.Send(msg)
+	if err != nil {
+		return
+	}
 }

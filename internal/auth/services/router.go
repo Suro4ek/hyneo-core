@@ -22,35 +22,43 @@ func NewServiceRouter(client mysql.Client, services []Service) service.ServiceSe
 	}
 }
 
-func (r *serviceRouter) NotifyServer(ctx context.Context, res *service.NotifyServerRequest) (*emptypb.Empty, error) {
+func (r *serviceRouter) NotifyServer(_ context.Context, res *service.NotifyServerRequest) (*emptypb.Empty, error) {
 	for _, s := range r.services {
-		ser := s.GetService()
-		var User auth.LinkUser
-		err := ser.Client.DB.Joins("User", ser.Client.DB.Where("id = ?", res.GetUserId())).First(&User).Error
+		userIdInt, err := strconv.ParseInt(res.GetUserId(), 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		user, err := s.GetUserID(userIdInt)
 		if err != nil {
 			return nil, UserNotFound
 		}
-		userIdInt, _ := strconv.ParseInt(res.GetUserId(), 10, 64)
-		s.SendMessage("Вы подключились к серверу "+res.GetServer(), userIdInt)
+		if user.ServiceId != s.GetService().ServiceID {
+			continue
+		}
+		s.SendMessage("Вы подключились к серверу "+res.GetServer(), user.ServiceUserID)
 	}
 	return &emptypb.Empty{}, nil
 }
 
-func (r *serviceRouter) Join(ctx context.Context, res *service.JoinRequest) (*emptypb.Empty, error) {
+func (r *serviceRouter) Join(_ context.Context, res *service.JoinRequest) (*emptypb.Empty, error) {
 	for _, s := range r.services {
-		ser := s.GetService()
-		var User auth.LinkUser
-		err := ser.Client.DB.Joins("User", ser.Client.DB.Where("id = ?", res.GetUserId())).First(&User).Error
+		userIdInt, err := strconv.ParseInt(res.GetUserId(), 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		user, err := s.GetUserID(userIdInt)
 		if err != nil {
 			return nil, UserNotFound
 		}
-		userIdInt, _ := strconv.ParseInt(res.GetUserId(), 10, 64)
-		s.SendMessage("Вы подключились к серверу с "+res.GetIp(), userIdInt)
+		if user.ServiceId != s.GetService().ServiceID {
+			continue
+		}
+		s.SendMessage("Вы подключились к серверу с ip: "+res.GetIp(), user.ServiceUserID)
 	}
 	return &emptypb.Empty{}, nil
 }
 
-func (r *serviceRouter) CheckCode(ctx context.Context, res *service.CheckCodeRequest) (*emptypb.Empty, error) {
+func (r *serviceRouter) CheckCode(_ context.Context, res *service.CheckCodeRequest) (*emptypb.Empty, error) {
 	for _, s := range r.services {
 		ser := s.GetService()
 		user, err := s.GetMCUser(res.GetUsername())

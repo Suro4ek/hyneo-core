@@ -9,18 +9,18 @@ import (
 	"strings"
 )
 
-type PasswordService struct {
+type Service struct {
 }
 
-func NewPasswordService() PasswordService {
-	return PasswordService{}
+func NewPasswordService() Service {
+	return Service{}
 }
-func (s *PasswordService) ComparePassword(hash string, password string) bool {
+func (s *Service) ComparePassword(hash string, password string) bool {
 	salt := strings.Split(hash, "$")[2]
 	return hash == getHash(password, salt)
 }
 
-func (s *PasswordService) CreatePassword(password string) string {
+func (s *Service) CreatePassword(password string) string {
 	salt := createSalt()
 	return getHash(password, salt)
 }

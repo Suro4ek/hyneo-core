@@ -2,6 +2,7 @@ package mc
 
 import (
 	"context"
+	"fmt"
 	"google.golang.org/protobuf/types/known/emptypb"
 	auth2 "hyneo/internal/auth"
 	"hyneo/pkg/mysql"
@@ -24,16 +25,25 @@ func NewAuthRouter(client *mysql.Client, service Service) auth.AuthServer {
 	}
 }
 
-func (r *routerService) Login(ctx context.Context, res *auth.LoginRequest) (*emptypb.Empty, error) {
-	err := r.service.Login(res.User.Username, res.Password)
+func (r *routerService) Login(_ context.Context, res *auth.LoginRequest) (*auth.User, error) {
+	user, err := r.service.Login(res.User.Username, res.Password)
 	if err != nil {
 		return nil, err
 	}
-	return &emptypb.Empty{}, nil
+	return &auth.User{
+		Id:           fmt.Sprintf("%d", user.ID),
+		Username:     user.Username,
+		LastLogin:    timestamppb.New(user.LastJoin),
+		Ip:           user.IP,
+		RegisteredIp: user.RegisteredIP,
+		LastServer:   user.LastServer,
+		Session:      timestamppb.New(user.Session),
+		Auth:         user.Authorized,
+	}, nil
 }
 
-func (r *routerService) Register(ctx context.Context, res *auth.RegisterRequest) (*emptypb.Empty, error) {
-	err := r.service.Register(&auth2.User{
+func (r *routerService) Register(_ context.Context, res *auth.RegisterRequest) (*auth.User, error) {
+	user, err := r.service.Register(&auth2.User{
 		Username:     res.User.Username,
 		PasswordHash: res.Password,
 		LastJoin:     time.Now(),
@@ -46,10 +56,19 @@ func (r *routerService) Register(ctx context.Context, res *auth.RegisterRequest)
 	if err != nil {
 		return nil, err
 	}
-	return &emptypb.Empty{}, nil
+	return &auth.User{
+		Id:           fmt.Sprintf("%d", user.ID),
+		Username:     user.Username,
+		LastLogin:    timestamppb.New(user.LastJoin),
+		Ip:           user.IP,
+		RegisteredIp: user.RegisteredIP,
+		LastServer:   user.LastServer,
+		Session:      timestamppb.New(user.Session),
+		Auth:         user.Authorized,
+	}, nil
 }
 
-func (r *routerService) ChangePassword(ctx context.Context, res *auth.ChangePasswordRequest) (*emptypb.Empty, error) {
+func (r *routerService) ChangePassword(_ context.Context, res *auth.ChangePasswordRequest) (*emptypb.Empty, error) {
 	err := r.service.ChangePassword(res.Username, res.OldPassword, res.NewPassword)
 	if err != nil {
 		return nil, err
@@ -57,7 +76,7 @@ func (r *routerService) ChangePassword(ctx context.Context, res *auth.ChangePass
 	return &emptypb.Empty{}, nil
 }
 
-func (r *routerService) Logout(ctx context.Context, res *auth.LogoutRequest) (*emptypb.Empty, error) {
+func (r *routerService) Logout(_ context.Context, res *auth.LogoutRequest) (*emptypb.Empty, error) {
 	err := r.service.Logout(res.Username)
 	if err != nil {
 		return nil, err
@@ -65,7 +84,7 @@ func (r *routerService) Logout(ctx context.Context, res *auth.LogoutRequest) (*e
 	return &emptypb.Empty{}, nil
 }
 
-func (r *routerService) LastLogin(ctx context.Context, res *auth.LastLoginRequest) (*auth.LastLoginResponse, error) {
+func (r *routerService) LastLogin(_ context.Context, res *auth.LastLoginRequest) (*auth.LastLoginResponse, error) {
 	lastLogin, err := r.service.LastLogin(res.Username)
 	if err != nil {
 		return nil, err
@@ -75,7 +94,7 @@ func (r *routerService) LastLogin(ctx context.Context, res *auth.LastLoginReques
 	}, nil
 }
 
-func (r *routerService) GetUser(ctx context.Context, res *auth.GetUserRequest) (*auth.GetUserResponse, error) {
+func (r *routerService) GetUser(_ context.Context, res *auth.GetUserRequest) (*auth.GetUserResponse, error) {
 	user, err := r.service.GetUser(res.Username)
 	if err != nil {
 		return nil, err
@@ -93,7 +112,7 @@ func (r *routerService) GetUser(ctx context.Context, res *auth.GetUserRequest) (
 	}, nil
 }
 
-func (r *routerService) UnRegister(ctx context.Context, res *auth.UnRegisterRequest) (*emptypb.Empty, error) {
+func (r *routerService) UnRegister(_ context.Context, res *auth.UnRegisterRequest) (*emptypb.Empty, error) {
 	err := r.service.UnRegister(res.Username)
 	if err != nil {
 		return nil, err

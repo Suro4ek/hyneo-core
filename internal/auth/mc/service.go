@@ -6,9 +6,9 @@ import (
 )
 
 type Service interface {
-	Login(username string, password string) error
-	Register(*auth.User) error
-	ChangePassword(username string, old_password string, new_password string) error
+	Login(username string, password string) (*auth.User, error)
+	Register(*auth.User) (*auth.User, error)
+	ChangePassword(username string, oldPassword string, newPassword string) error
 	Logout(username string) error
 	LastLogin(username string) (string, error)
 	GetUser(id string) (*auth.User, error)

@@ -13,58 +13,58 @@ import (
 )
 
 type service struct {
-	client   *mysql.Client
-	pservice password.PasswordService
+	client  *mysql.Client
+	service password.Service
 }
 
 var (
 	IncorrectPassword = status.New(codes.Unauthenticated, "incorrect password").Err()
 )
 
-func NewMCService(client *mysql.Client, pservice password.PasswordService) mc.Service {
+func NewMCService(client *mysql.Client, pservice password.Service) mc.Service {
 	return &service{
-		client:   client,
-		pservice: pservice,
+		client:  client,
+		service: pservice,
 	}
 }
 
-func (s *service) Login(username string, password string) error {
+func (s *service) Login(username string, password string) (*auth.User, error) {
 	var user auth.User
 	err := s.client.DB.Model(&auth.User{Username: username}).First(&user).Error
 	if err != nil {
-		return err
+		return nil, err
 	}
-	if !s.pservice.ComparePassword(user.PasswordHash, password) {
-		return IncorrectPassword
+	if !s.service.ComparePassword(user.PasswordHash, password) {
+		return nil, IncorrectPassword
 	}
 	user.Authorized = true
 	user.LastJoin = time.Now()
 	err = s.client.DB.Save(&user).Error
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return &user, nil
 }
 
-func (s *service) Register(user *auth.User) error {
-	user.PasswordHash = s.pservice.CreatePassword(user.PasswordHash)
+func (s *service) Register(user *auth.User) (*auth.User, error) {
+	user.PasswordHash = s.service.CreatePassword(user.PasswordHash)
 	err := s.client.DB.Create(user).Error
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return user, nil
 }
 
-func (s *service) ChangePassword(username string, old_password string, new_password string) error {
+func (s *service) ChangePassword(username string, oldPassword string, newPassword string) error {
 	var user auth.User
 	err := s.client.DB.Model(&auth.User{Username: username}).First(&user).Error
 	if err != nil {
 		return err
 	}
-	if !s.pservice.ComparePassword(user.PasswordHash, old_password) {
+	if !s.service.ComparePassword(user.PasswordHash, oldPassword) {
 		return IncorrectPassword
 	}
-	user.PasswordHash = s.pservice.CreatePassword(new_password)
+	user.PasswordHash = s.service.CreatePassword(newPassword)
 	err = s.client.DB.Save(&user).Error
 	if err != nil {
 		return err

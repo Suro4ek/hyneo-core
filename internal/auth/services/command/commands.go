@@ -10,7 +10,6 @@ func RegisterCommands() {
 	RegisterCommand(Bind)
 	RegisterCommand(UnBind)
 	RegisterCommand(Account)
-	RegisterCommand(ClearKeyboard)
 	RegisterCommand(Accounts)
 }
 

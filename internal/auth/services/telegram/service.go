@@ -2,6 +2,7 @@ package telegram
 
 import (
 	"fmt"
+	"github.com/go-redis/redis/v9"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"hyneo/internal/auth"
 	"hyneo/internal/auth/code"
@@ -13,15 +14,17 @@ type telegramService struct {
 	bot       *tgbotapi.BotAPI
 	Client    *mysql.Client
 	Code      *code.Service
+	Redis     *redis.Client
 	ServiceID int
 }
 
-func NewTelegramService(client *mysql.Client, bot *tgbotapi.BotAPI, Code *code.Service, ServiceID int) services.Service {
+func NewTelegramService(client *mysql.Client, bot *tgbotapi.BotAPI, Code *code.Service, redis *redis.Client, ServiceID int) services.Service {
 	return &telegramService{
 		Client:    client,
 		bot:       bot,
 		Code:      Code,
 		ServiceID: ServiceID,
+		Redis:     redis,
 	}
 }
 
@@ -38,6 +41,7 @@ func (s *telegramService) GetService() *services.GetService {
 		ServiceID: s.ServiceID,
 		Client:    s.Client,
 		Code:      s.Code,
+		Redis:     s.Redis,
 	}
 }
 

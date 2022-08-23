@@ -1,6 +1,7 @@
 package services
 
 import (
+	"github.com/go-redis/redis/v9"
 	"hyneo/internal/auth"
 	"hyneo/internal/auth/code"
 	"hyneo/pkg/mysql"
@@ -28,4 +29,5 @@ type GetService struct {
 	ServiceID int
 	Client    *mysql.Client
 	Code      *code.Service
+	Redis     *redis.Client
 }

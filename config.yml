@@ -1,5 +1,5 @@
 mysql:
-  host: 192.168.0.8
+  host: 192.168.0.144
   port: 3306
   user: root
   pass: example
@@ -11,6 +11,6 @@ vk:
 telegram:
   token: 5624813584:AAE-q1tvLGNiWBiJxOia_ncijY9fbQIgqoc
 redis:
-  host: 192.168.0.8
+  host: 192.168.0.144
   port: 6379
-  pass: redis
+  pass: example

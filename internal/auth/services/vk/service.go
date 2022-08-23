@@ -6,6 +6,7 @@ import (
 	"github.com/SevereCloud/vksdk/v2/api/params"
 	"github.com/SevereCloud/vksdk/v2/events"
 	"github.com/SevereCloud/vksdk/v2/object"
+	"github.com/go-redis/redis/v9"
 	"hyneo/internal/auth"
 	"hyneo/internal/auth/code"
 	"hyneo/internal/auth/services"
@@ -17,15 +18,17 @@ type Service struct {
 	Client    *mysql.Client
 	Vk        *api.VK
 	Code      *code.Service
+	Redis     *redis.Client
 	ServiceID int
 }
 
-func NewVkService(Client *mysql.Client, VK *api.VK, Code *code.Service, ServiceID int) services.Service {
+func NewVkService(Client *mysql.Client, VK *api.VK, Code *code.Service, redis *redis.Client, ServiceID int) services.Service {
 	return &Service{
 		Client:    Client,
 		Vk:        VK,
 		Code:      Code,
 		ServiceID: ServiceID,
+		Redis:     redis,
 	}
 }
 
@@ -42,6 +45,7 @@ func (s *Service) GetService() *services.GetService {
 		ServiceID: s.ServiceID,
 		Client:    s.Client,
 		Code:      s.Code,
+		Redis:     s.Redis,
 	}
 }
 

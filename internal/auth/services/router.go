@@ -10,12 +10,12 @@ import (
 )
 
 type serviceRouter struct {
-	Client   mysql.Client
+	Client   *mysql.Client
 	services []Service
 	service.UnimplementedServiceServer
 }
 
-func NewServiceRouter(client mysql.Client, services []Service) service.ServiceServer {
+func NewServiceRouter(client *mysql.Client, services []Service) service.ServiceServer {
 	return &serviceRouter{
 		Client:   client,
 		services: services,

@@ -14,11 +14,16 @@ service Auth {
     rpc LastLogin(LastLoginRequest) returns (LastLoginResponse) {}
     rpc GetUser(GetUserRequest) returns (GetUserResponse) {}
     rpc UnRegister(UnRegisterRequest) returns (google.protobuf.Empty) {}
+    rpc UpdateUser(UpdateUserRequest) returns (User) {}
 }
 
 message LoginRequest {
     User user = 1;
     string password = 2;
+}
+
+message UpdateUserRequest {
+    User user = 1;
 }
 
 message RegisterRequest {

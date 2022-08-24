@@ -39,6 +39,7 @@ func (s *service) Login(username string, password string) (*auth.User, error) {
 	}
 	user.Authorized = true
 	user.LastJoin = time.Now()
+	user.Session = time.Now().Add(time.Hour * 24)
 	err = s.client.DB.Save(&user).Error
 	if err != nil {
 		return nil, err

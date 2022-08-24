@@ -33,6 +33,7 @@ func (h *handler) Message() {
 		marray := strings.Fields(mstr)
 		cmd, userId := h.GetCommandByPayload(strings.ReplaceAll(m.Message.Payload, "\"", ""))
 		if cmd != nil {
+			//TODO check is account binded to user
 			userIdInt, _ := strconv.ParseInt(userId, 10, 64)
 			go cmd.Exec(m, userIdInt, *h.service)
 		} else {

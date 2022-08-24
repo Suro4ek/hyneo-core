@@ -31,3 +31,9 @@ type GetService struct {
 	Code      *code.Service
 	Redis     *redis.Client
 }
+
+type RedisSend struct {
+	Channel string `json:"channel"`
+	UserId  string `json:"userId"`
+	Message string `json:"message"`
+}

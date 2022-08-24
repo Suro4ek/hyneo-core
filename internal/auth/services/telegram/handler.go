@@ -49,6 +49,7 @@ func (h *handler) Message() {
 				return
 			}
 			cmd, userId := h.GetCommandByPayload(update.CallbackQuery.Data)
+			//TODO check is account binded to user
 			userIdInt, _ := strconv.ParseInt(userId, 10, 64)
 			if cmd != nil {
 				go cmd.Exec(update.CallbackQuery.Message, userIdInt, *h.service)

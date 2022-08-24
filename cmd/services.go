@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/SevereCloud/vksdk/v2/api"
 	"github.com/SevereCloud/vksdk/v2/longpoll-bot"
+	"github.com/go-redis/redis/v9"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"hyneo/internal/auth/code"
 	"hyneo/internal/auth/services"
@@ -13,18 +14,18 @@ import (
 	"log"
 )
 
-func RunServices(cfg *config.Config, service *code.Service, client *mysql.Client) []services.Service {
+func RunServices(cfg *config.Config, service *code.Service, client *mysql.Client, redis *redis.Client) []services.Service {
 	servicess := make([]services.Service, 0)
-	servicess = append(servicess, runVKLongServer(client, cfg, service))
-	servicess = append(servicess, runTGServer(client, cfg, service))
+	servicess = append(servicess, runVKLongServer(client, cfg, service, redis))
+	servicess = append(servicess, runTGServer(client, cfg, service, redis))
 	return servicess
 }
 
-func runVKLongServer(Client *mysql.Client, cfg *config.Config, code *code.Service) services.Service {
+func runVKLongServer(Client *mysql.Client, cfg *config.Config, code *code.Service, redis *redis.Client) services.Service {
 	token := cfg.VK.Token // use os.Getenv("TOKEN")
 	vk := api.NewVK(token)
 
-	service := vk2.NewVkService(Client, vk, code, 0)
+	service := vk2.NewVkService(Client, vk, code, redis, 0)
 	// get information about the group
 	group, err := vk.GroupsGetByID(api.Params{
 		"group_id": cfg.VK.GroupID,
@@ -45,7 +46,7 @@ func runVKLongServer(Client *mysql.Client, cfg *config.Config, code *code.Servic
 	return service
 }
 
-func runTGServer(Client *mysql.Client, cfg *config.Config, code *code.Service) services.Service {
+func runTGServer(Client *mysql.Client, cfg *config.Config, code *code.Service, redis *redis.Client) services.Service {
 	bot, err := tgbotapi.NewBotAPI(cfg.Telegram.Token)
 	if err != nil {
 		log.Panic(err)
@@ -55,7 +56,7 @@ func runTGServer(Client *mysql.Client, cfg *config.Config, code *code.Service) s
 
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 
-	service := telegram.NewTelegramService(Client, bot, code, 1)
+	service := telegram.NewTelegramService(Client, bot, code, redis, 1)
 	go func() {
 		handler := telegram.NewTelegramHandler(bot, &service)
 		handler.Message()

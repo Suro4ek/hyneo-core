@@ -33,9 +33,9 @@ func main() {
 	codeService := &code.Service{
 		Client: redisClient,
 	}
-	runServices := RunServices(cfg, codeService, client)
+	runServices := RunServices(cfg, codeService, client, redisClient)
 	command.RegisterCommands()
-	runGRPCServer(runServices, *client, *cfg)
+	runGRPCServer(runServices, client, *cfg)
 }
 
 func migrate(client *mysql.Client) {
@@ -49,7 +49,7 @@ func migrate(client *mysql.Client) {
 	}
 }
 
-func runGRPCServer(servicess []services.Service, client mysql.Client, cfg config.Config) {
+func runGRPCServer(servicess []services.Service, client *mysql.Client, cfg config.Config) {
 	addr := "0.0.0.0:" + cfg.GRPCPort
 	lis, err := net.Listen("tcp", addr)
 	if err != nil {
@@ -58,8 +58,8 @@ func runGRPCServer(servicess []services.Service, client mysql.Client, cfg config
 	s := grpc.NewServer()
 
 	passwordService := password.NewPasswordService()
-	serviceAuth := service2.NewMCService(&client, passwordService)
-	authService := mc.NewAuthRouter(&client, serviceAuth)
+	serviceAuth := service2.NewMCService(client, passwordService)
+	authService := mc.NewAuthRouter(client, serviceAuth)
 	auth.RegisterAuthServer(s, authService)
 
 	service := services.NewServiceRouter(client, servicess)

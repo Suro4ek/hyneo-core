@@ -2,6 +2,8 @@ package command
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"hyneo/internal/auth/services"
 )
 
@@ -11,7 +13,12 @@ var Kick = &Command{
 	Exec: func(message interface{}, userId int64, service services.Service) {
 		msg := service.GetMessage(message)
 		ser := service.GetService()
-		ser.Redis.Publish(context.Background(), "kick", userId)
+		out, _ := json.Marshal(services.RedisSend{
+			Channel: "kick",
+			UserId:  fmt.Sprintf("%d", userId),
+			Message: "§cВы кикнуты из игры с помощью бота ВК",
+		})
+		ser.Redis.Publish(context.Background(), "messenger.bungee", string(out))
 		service.SendMessage("Вы кикнули ", msg.ChatID)
 	},
 }

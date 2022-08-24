@@ -11,6 +11,7 @@ func RegisterCommands() {
 	RegisterCommand(UnBind)
 	RegisterCommand(Account)
 	RegisterCommand(Accounts)
+	RegisterCommand(Kick)
 }
 
 func GetCommands() map[string]*Command {

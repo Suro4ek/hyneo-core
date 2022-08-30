@@ -15,12 +15,12 @@ type User struct {
 }
 
 type LinkUser struct {
-	ID            int64 `json:"id"`
-	ServiceId     int   `json:"service_id"`
-	ServiceUserID int64 `json:"service_user_id"`
-	Notificated   bool  `json:"notificated"`
-	Banned        bool  `json:"banned"`
-	DoubleAuth    bool  `json:"double_auth"`
-	UserID        int64 `json:"user_id"`
+	ID            int64 `json:"id" redis:"id"`
+	ServiceId     int   `json:"service_id" redis:"service_id"`
+	ServiceUserID int64 `json:"service_user_id" redis:"service_user_id"`
+	Notificated   bool  `json:"notificated" redis:"notificated"`
+	Banned        bool  `json:"banned" redis:"banned"`
+	DoubleAuth    bool  `json:"double_auth" redis:"double_auth"`
+	UserID        int64 `json:"user_id" redis:"user_id"`
 	User          User
 }

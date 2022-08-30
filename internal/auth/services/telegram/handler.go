@@ -1,10 +1,14 @@
 package telegram
 
 import (
+	"context"
+	"github.com/go-redis/redis/v9"
+	"hyneo/internal/auth"
 	"hyneo/internal/auth/services"
 	"hyneo/internal/auth/services/command"
 	"strconv"
 	"strings"
+	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -34,11 +38,11 @@ func (h *handler) Message() {
 			}
 			if update.Message.IsCommand() {
 				if cmd, ok := command.GetCommands()[strings.ToLower(update.Message.Command())]; ok {
-					go cmd.Exec(update.Message, 0, *h.service)
+					go cmd.Exec(update.Message, &auth.LinkUser{}, *h.service)
 				} else {
 					cmd := h.GetCommand(update.Message.Command())
 					if cmd != nil {
-						go cmd.Exec(update.Message, 0, *h.service)
+						go cmd.Exec(update.Message, &auth.LinkUser{}, *h.service)
 					}
 				}
 			}
@@ -49,10 +53,43 @@ func (h *handler) Message() {
 				return
 			}
 			cmd, userId := h.GetCommandByPayload(update.CallbackQuery.Data)
-			//TODO check is account binded to user
-			userIdInt, _ := strconv.ParseInt(userId, 10, 64)
+			if cmd.WithoutUser {
+				go cmd.Exec(update.CallbackQuery.Message, &auth.LinkUser{}, *h.service)
+				return
+			}
+			userIdInt, err := strconv.ParseInt(userId, 10, 64)
+			if err != nil {
+				(*h.service).ClearKeyboard("Этот аккаунт не привязан к вам", update.Message.From.ID)
+				return
+			}
+			user := &auth.LinkUser{}
+			ser := (*h.service).GetService()
+			err = ser.Redis.HGetAll(context.Background(), "link:"+userId).Scan(&user)
+			if err != nil {
+				user, err = (*h.service).GetUserID(userIdInt)
+				if err != nil {
+					(*h.service).ClearKeyboard("Этот аккаунт не привязан к вам", update.Message.From.ID)
+					return
+				} else {
+					ctx := context.TODO()
+					if _, err := ser.Redis.Pipelined(ctx, func(rdb redis.Pipeliner) error {
+						rdb.HSet(ctx, "link:"+userId, "id", user.ID)
+						rdb.HSet(ctx, "link:"+userId, "service_id", user.ServiceId)
+						rdb.HSet(ctx, "link:"+userId, "service_user_id", user.ServiceUserID)
+						rdb.HSet(ctx, "link:"+userId, "notificated", user.Notificated)
+						rdb.HSet(ctx, "link:"+userId, "banned", user.Banned)
+						rdb.HSet(ctx, "link:"+userId, "double_auth", user.DoubleAuth)
+						rdb.HSet(ctx, "link:"+userId, "user_id", user.UserID)
+						return nil
+					}); err != nil {
+						(*h.service).ClearKeyboard("Этот аккаунт не привязан к вам", update.Message.From.ID)
+						return
+					}
+					ser.Redis.Expire(ctx, "link:"+userId, time.Minute*5)
+				}
+			}
 			if cmd != nil {
-				go cmd.Exec(update.CallbackQuery.Message, userIdInt, *h.service)
+				go cmd.Exec(update.CallbackQuery.Message, user, *h.service)
 			}
 		}
 	}

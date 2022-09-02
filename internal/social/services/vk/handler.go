@@ -4,8 +4,8 @@ import (
 	"context"
 	"github.com/go-redis/redis/v9"
 	"hyneo/internal/auth"
-	"hyneo/internal/auth/services"
-	"hyneo/internal/auth/services/command"
+	"hyneo/internal/social/services"
+	command2 "hyneo/internal/social/services/command"
 	"log"
 	"strconv"
 	"strings"
@@ -73,7 +73,7 @@ func (h *handler) Message() {
 			}
 			go cmd.Exec(m, user, *h.service)
 		} else {
-			if cmd, ok := command.GetCommands()[strings.ToLower(marray[0])]; ok {
+			if cmd, ok := command2.GetCommands()[strings.ToLower(marray[0])]; ok {
 				if cmd.Payload == "-1" {
 					go cmd.Exec(m, &auth.LinkUser{}, *h.service)
 				}
@@ -86,8 +86,8 @@ func (h *handler) Message() {
 	}
 }
 
-func (h *handler) GetCommandByPayload(payload string) (cmd *command.Command, userId string) {
-	for _, cmd := range command.GetCommands() {
+func (h *handler) GetCommandByPayload(payload string) (cmd *command2.Command, userId string) {
+	for _, cmd := range command2.GetCommands() {
 		if strings.HasPrefix(payload, cmd.Payload) {
 			return cmd, strings.TrimSpace(payload[len(cmd.Payload):])
 		}

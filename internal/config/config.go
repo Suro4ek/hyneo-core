@@ -8,11 +8,16 @@ import (
 )
 
 type Config struct {
-	MySQL    MySQL          `yaml:"mysql"`
-	GRPCPort string         `yaml:"grpc_port" env:"GRPC_PORT"`
-	VK       VKConfig       `yaml:"vk"`
-	Telegram TelegramConfig `yaml:"telegram"`
-	Redis    Redis          `yaml:"redis"`
+	MySQL    MySQL  `yaml:"mysql"`
+	GRPCPort string `yaml:"grpc_port" env:"GRPC_PORT"`
+	Redis    Redis  `yaml:"redis"`
+	Social   Social `yaml:"social"`
+}
+
+type Social struct {
+	VK       VKConfig         `yaml:"vk"`
+	Telegram TelegramConfig   `yaml:"telegram"`
+	Keyboard []KeyboardConfig `yaml:"keyboard"`
 }
 
 type MySQL struct {
@@ -37,6 +42,17 @@ type VKConfig struct {
 type TelegramConfig struct {
 	Token string `yaml:"token"`
 }
+
+type (
+	KeyboardConfig struct {
+		KeyboardButtons []KeyboardButtons `yaml:"buttons"`
+	}
+	KeyboardButtons struct {
+		Name    string `yaml:"name"`
+		Payload string `yaml:"payload"`
+		Color   string `yaml:"color"`
+	}
+)
 
 var instance *Config
 var once sync.Once

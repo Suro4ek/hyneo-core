@@ -2,10 +2,9 @@ package telegram
 
 import (
 	"context"
-	"github.com/go-redis/redis/v9"
 	"hyneo/internal/auth"
-	"hyneo/internal/auth/services"
-	"hyneo/internal/auth/services/command"
+	"hyneo/internal/social/services"
+	command2 "hyneo/internal/social/services/command"
 	"strconv"
 	"strings"
 	"time"
@@ -37,7 +36,7 @@ func (h *handler) Message() {
 				return
 			}
 			if update.Message.IsCommand() {
-				if cmd, ok := command.GetCommands()[strings.ToLower(update.Message.Command())]; ok {
+				if cmd, ok := command2.GetCommands()[strings.ToLower(update.Message.Command())]; ok {
 					go cmd.Exec(update.Message, &auth.LinkUser{}, *h.service)
 				} else {
 					cmd := h.GetCommand(update.Message.Command())
@@ -95,8 +94,8 @@ func (h *handler) Message() {
 	}
 }
 
-func (h *handler) GetCommandByPayload(payload string) (cmd *command.Command, userId string) {
-	for _, cmd := range command.GetCommands() {
+func (h *handler) GetCommandByPayload(payload string) (cmd *command2.Command, userId string) {
+	for _, cmd := range command2.GetCommands() {
 		if strings.HasPrefix(payload, cmd.Payload) {
 			return cmd, strings.TrimSpace(payload[len(cmd.Payload):])
 		}
@@ -104,8 +103,8 @@ func (h *handler) GetCommandByPayload(payload string) (cmd *command.Command, use
 	return nil, ""
 }
 
-func (h *handler) GetCommand(cmd1 string) *command.Command {
-	for _, cmd := range command.GetCommands() {
+func (h *handler) GetCommand(cmd1 string) *command2.Command {
+	for _, cmd := range command2.GetCommands() {
 		for _, alias := range cmd.Alias {
 			if alias == cmd1 {
 				return cmd

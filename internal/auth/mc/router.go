@@ -12,6 +12,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
+//TODO надо переделать id возравращение из string в int32, чтобы оно могла парситься с сервера
 type routerService struct {
 	client  *mysql.Client
 	service Service

@@ -8,9 +8,10 @@ import (
 	"hyneo/internal/auth/mc"
 	service2 "hyneo/internal/auth/mc/service"
 	"hyneo/internal/auth/password"
-	"hyneo/internal/auth/services"
-	"hyneo/internal/auth/services/command"
 	"hyneo/internal/config"
+	"hyneo/internal/social/keyboard"
+	services2 "hyneo/internal/social/services"
+	"hyneo/internal/social/services/command"
 	"hyneo/pkg/logging"
 	"hyneo/pkg/mysql"
 	"hyneo/pkg/redis"
@@ -25,6 +26,7 @@ func main() {
 	logger := logging.GetLogger()
 	cfg := config.GetConfig()
 	client := mysql.NewClient(context.Background(), 5, cfg.MySQL)
+	keyboard.Init(cfg.Social.Keyboard)
 	redisClient, err := redis.NewClient(context.Background(), cfg.Redis)
 	if err != nil {
 		logger.Fatal(err)
@@ -49,7 +51,7 @@ func migrate(client *mysql.Client) {
 	}
 }
 
-func runGRPCServer(servicess []services.Service, client *mysql.Client, cfg config.Config) {
+func runGRPCServer(servicess []services2.Service, client *mysql.Client, cfg config.Config) {
 	addr := "0.0.0.0:" + cfg.GRPCPort
 	lis, err := net.Listen("tcp", addr)
 	if err != nil {
@@ -62,7 +64,7 @@ func runGRPCServer(servicess []services.Service, client *mysql.Client, cfg confi
 	authService := mc.NewAuthRouter(client, serviceAuth)
 	auth.RegisterAuthServer(s, authService)
 
-	service := services.NewServiceRouter(client, servicess)
+	service := services2.NewServiceRouter(client, servicess)
 	serviceRouter.RegisterServiceServer(s, service)
 
 	if err := s.Serve(lis); err != nil {

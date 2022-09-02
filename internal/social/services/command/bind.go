@@ -4,7 +4,7 @@ import (
 	"errors"
 	"gorm.io/gorm"
 	"hyneo/internal/auth"
-	"hyneo/internal/auth/services"
+	"hyneo/internal/social/services"
 	"strings"
 )
 

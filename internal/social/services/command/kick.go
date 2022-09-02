@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"hyneo/internal/auth"
-	"hyneo/internal/auth/services"
+	"hyneo/internal/social/services"
 )
 
 var Kick = &Command{

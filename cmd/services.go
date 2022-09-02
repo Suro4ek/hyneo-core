@@ -3,13 +3,12 @@ package main
 import (
 	"github.com/SevereCloud/vksdk/v2/api"
 	"github.com/SevereCloud/vksdk/v2/longpoll-bot"
-	"github.com/go-redis/redis/v9"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"hyneo/internal/auth/code"
-	"hyneo/internal/auth/services"
-	"hyneo/internal/auth/services/telegram"
-	vk2 "hyneo/internal/auth/services/vk"
 	"hyneo/internal/config"
+	"hyneo/internal/social/services"
+	telegram2 "hyneo/internal/social/services/telegram"
+	vk3 "hyneo/internal/social/services/vk"
 	"hyneo/pkg/mysql"
 	"log"
 )
@@ -25,7 +24,7 @@ func runVKLongServer(Client *mysql.Client, cfg *config.Config, code *code.Servic
 	token := cfg.VK.Token // use os.Getenv("TOKEN")
 	vk := api.NewVK(token)
 
-	service := vk2.NewVkService(Client, vk, code, redis, 0)
+	service := vk3.NewVkService(Client, vk, code, redis, 0)
 	// get information about the group
 	group, err := vk.GroupsGetByID(api.Params{
 		"group_id": cfg.VK.GroupID,
@@ -40,7 +39,7 @@ func runVKLongServer(Client *mysql.Client, cfg *config.Config, code *code.Servic
 		if err != nil {
 			log.Fatal(err)
 		}
-		handler := vk2.NewVKHandler(lp, &service)
+		handler := vk3.NewVKHandler(lp, &service)
 		handler.Message()
 	}()
 	return service
@@ -56,9 +55,9 @@ func runTGServer(Client *mysql.Client, cfg *config.Config, code *code.Service, r
 
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 
-	service := telegram.NewTelegramService(Client, bot, code, redis, 1)
+	service := telegram2.NewTelegramService(Client, bot, code, redis, 1)
 	go func() {
-		handler := telegram.NewTelegramHandler(bot, &service)
+		handler := telegram2.NewTelegramHandler(bot, &service)
 		handler.Message()
 	}()
 	return service

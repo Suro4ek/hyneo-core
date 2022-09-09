@@ -14,6 +14,7 @@ type User struct {
 	Authorized   bool      `json:"authorized"`
 }
 
+//TODO подумать насчет DoubleAuth оставить его или нет
 type LinkUser struct {
 	ID            int64 `json:"id" redis:"id"`
 	ServiceId     int   `json:"service_id" redis:"service_id"`

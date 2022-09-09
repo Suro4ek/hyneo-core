@@ -2,7 +2,7 @@ package command
 
 import (
 	"hyneo/internal/auth"
-	"hyneo/internal/auth/services"
+	"hyneo/internal/social/services"
 )
 
 var Status = &Command{

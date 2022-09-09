@@ -5,12 +5,35 @@ mysql:
   pass: example
   db: example
 grpc_port: 9000
-vk:
-  group_id: 215446134
-  token: vk1.a.BWlQ9Nn9erPa9TijTyqKEAyEJXwpWEzM_lKN0kg-DYBIl1qz2DtuO-Hl71caXbPTOEdG1Pkcf5SgVA1R_vfcS9Sg7RPTTlS44rY3_KeiHcwFBmHogEKRr1iJqfScD91qXShusWQSYEg-ybIm2ANHwXkXcajxDvmDdO70KMpCJ3IWm5ko4lCy_vBEVHzmP8h4
-telegram:
-  token: 5624813584:AAE-q1tvLGNiWBiJxOia_ncijY9fbQIgqoc
 redis:
   host: 192.168.0.144
   port: 6379
   pass: example
+social:
+  vk:
+    group_id: 215446134
+    token: vk1.a.BWlQ9Nn9erPa9TijTyqKEAyEJXwpWEzM_lKN0kg-DYBIl1qz2DtuO-Hl71caXbPTOEdG1Pkcf5SgVA1R_vfcS9Sg7RPTTlS44rY3_KeiHcwFBmHogEKRr1iJqfScD91qXShusWQSYEg-ybIm2ANHwXkXcajxDvmDdO70KMpCJ3IWm5ko4lCy_vBEVHzmP8h4
+  telegram:
+    token: 5624813584:AAE-q1tvLGNiWBiJxOia_ncijY9fbQIgqoc
+  keyboard:
+    - buttons:
+        - name: Информация о аккаунте
+          payload: status
+          color: primary
+    - buttons:
+        - name: Переключить блокировку
+          payload: ban
+          color: primary
+        - name: Переключить уведомления
+          payload: notify
+          color: primary
+    - buttons:
+        - name: Кикнуть
+          payload: kick
+          color: primary
+        - name: Восставновить
+          payload: restore
+          color: primary
+        - name: Отвязать аккаунт
+          payload: unlink
+          color: primary

@@ -6,7 +6,8 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"hyneo/internal/auth"
 	"hyneo/internal/auth/code"
-	"hyneo/internal/auth/services"
+	"hyneo/internal/social/keyboard"
+	"hyneo/internal/social/services"
 	"hyneo/pkg/mysql"
 )
 
@@ -104,22 +105,29 @@ func (s *telegramService) AccountKeyboard(message string, chatID int64, userID i
 }
 
 func (s *telegramService) SoloUserKeyBoard(userId int64) tgbotapi.InlineKeyboardMarkup {
-	return tgbotapi.NewInlineKeyboardMarkup(
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Статус", fmt.Sprintf("status %d", userId)),
-		),
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Восстановить", fmt.Sprintf("restore %d", userId)),
-		),
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Уведомления", fmt.Sprintf("notify %d", userId)),
-			tgbotapi.NewInlineKeyboardButtonData("Кикнуть", fmt.Sprintf("kick %d", userId)),
-			tgbotapi.NewInlineKeyboardButtonData("Заблокировать", fmt.Sprintf("ban %d", userId)),
-		),
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Отвязать аккаунт", fmt.Sprintf("unlink %d", userId)),
-		),
-	)
+	buttons := tgbotapi.NewInlineKeyboardMarkup()
+	for _, keyboardConfig := range keyboard.Keyboard {
+		row := tgbotapi.NewInlineKeyboardRow()
+		for _, button := range keyboardConfig.KeyboardButtons {
+			row = append(row, tgbotapi.NewInlineKeyboardButtonData(button.Name, fmt.Sprintf("%s %d", button.Payload, userId)))
+		}
+		buttons.InlineKeyboard = append(buttons.InlineKeyboard, row)
+	}
+	return buttons
+	//return tgbotapi.NewInlineKeyboardMarkup(
+	//	tgbotapi.NewInlineKeyboardRow(
+	//		tgbotapi.NewInlineKeyboardButtonData("Информацаия о аккаунте", fmt.Sprintf("status %d", userId)),
+	//	),
+	//	tgbotapi.NewInlineKeyboardRow(
+	//		tgbotapi.NewInlineKeyboardButtonData("Переключить блокировку", fmt.Sprintf("ban %d", userId)),
+	//		tgbotapi.NewInlineKeyboardButtonData("Переключить уведомления", fmt.Sprintf("notify %d", userId)),
+	//	),
+	//	tgbotapi.NewInlineKeyboardRow(
+	//		tgbotapi.NewInlineKeyboardButtonData("Кикнуть", fmt.Sprintf("kick %d", userId)),
+	//		tgbotapi.NewInlineKeyboardButtonData("Восставноить", fmt.Sprintf("ban %d", userId)),
+	//		tgbotapi.NewInlineKeyboardButtonData("Отвязать аккаунт", fmt.Sprintf("unlink %d", userId)),
+	//	),
+	//)
 }
 
 func (s *telegramService) SendKeyboard(message string, chatId int64) {

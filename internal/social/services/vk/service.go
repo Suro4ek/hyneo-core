@@ -9,7 +9,8 @@ import (
 	"github.com/go-redis/redis/v9"
 	"hyneo/internal/auth"
 	"hyneo/internal/auth/code"
-	"hyneo/internal/auth/services"
+	"hyneo/internal/social/keyboard"
+	"hyneo/internal/social/services"
 	"hyneo/pkg/mysql"
 	"log"
 )
@@ -109,17 +110,23 @@ func (s *Service) ClearKeyboard(message string, chadID int64) {
 }
 
 func (s *Service) SoloUserKeyBoard(userID int64) *object.MessagesKeyboard {
-	keyboard := object.NewMessagesKeyboard(false)
-	keyboard.AddRow()
-	keyboard.AddTextButton("Статус", fmt.Sprintf("status %d", userID), "primary")
-	keyboard.AddRow()
-	keyboard.AddTextButton("Восстановить", fmt.Sprintf("restore %d", userID), "positive")
-	keyboard.AddRow().AddTextButton("Уведомления", fmt.Sprintf("notify %d", userID), "positive").
-		AddTextButton("Кикнуть", fmt.Sprintf("kick %d", userID), "negative").
-		AddTextButton("Заблокировать", fmt.Sprintf("ban %d", userID), "negative")
-	keyboard.AddRow()
-	keyboard.AddTextButton("Отвязать", fmt.Sprintf("unlink %d", userID), "negative")
-	return keyboard
+	buttons := object.NewMessagesKeyboard(false)
+	for _, keyboardConfig := range keyboard.Keyboard {
+		buttons.AddRow()
+		for _, button := range keyboardConfig.KeyboardButtons {
+			buttons.AddTextButton(button.Name, fmt.Sprintf("%s %d", button.Payload, userID), button.Color)
+		}
+	}
+	//keyboard.AddRow()
+	//keyboard.AddTextButton("Статус", fmt.Sprintf("status %d", userID), "primary")
+	//keyboard.AddRow()
+	//keyboard.AddTextButton("Восстановить", fmt.Sprintf("restore %d", userID), "positive")
+	//keyboard.AddRow().AddTextButton("Уведомления", fmt.Sprintf("notify %d", userID), "positive").
+	//	AddTextButton("Кикнуть", fmt.Sprintf("kick %d", userID), "negative").
+	//	AddTextButton("Заблокировать", fmt.Sprintf("ban %d", userID), "negative")
+	//keyboard.AddRow()
+	//keyboard.AddTextButton("Отвязать", fmt.Sprintf("unlink %d", userID), "negative")
+	return buttons
 }
 
 func (s *Service) AccountKeyboard(message string, chatID int64, userID int64) {

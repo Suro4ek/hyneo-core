@@ -27,17 +27,17 @@
                  }
              }
         }
-        stage ('Deploy') {
-            steps{
-                sshagent(credentials : ['launch']) {
-                sh '''
-                    [ -d ~/.ssh ] || mkdir ~/.ssh && chmod 0700 ~/.ssh
-                    ssh-keyscan -t rsa,dsa -p 11 mc.hyneo.ru >> ~/.ssh/known_hosts
-                    ssh -p 11 suro@mc.hyneo.ru 'cd ./core && docker compose pull core && docker compose down core && docker compose up -d core'
-                    '''
-                }
-            }
-        }
+//         stage ('Deploy') {
+//             steps{
+//                 sshagent(credentials : ['launch']) {
+//                 sh '''
+//                     [ -d ~/.ssh ] || mkdir ~/.ssh && chmod 0700 ~/.ssh
+//                     ssh-keyscan -t rsa,dsa -p 11 mc.hyneo.ru >> ~/.ssh/known_hosts
+//                     ssh -p 11 suro@mc.hyneo.ru 'cd ./core && docker compose pull core && docker compose down core && docker compose up -d core'
+//                     '''
+//                 }
+//             }
+//         }
         stage('Dangling Images') {
             steps {
                 sh 'docker images -q -f dangling=true | xargs --no-run-if-empty docker rmi'

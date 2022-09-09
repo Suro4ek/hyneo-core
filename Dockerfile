@@ -9,7 +9,7 @@ RUN go mod download
 
 COPY ./ ./
 COPY config.yml ./
-RUN go build cmd/main.go
+RUN go build cmd/main.go cmd/services.go
 
 CMD ["./main"]
 

@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/SevereCloud/vksdk/v2/api"
 	"github.com/SevereCloud/vksdk/v2/longpoll-bot"
+	"github.com/go-redis/redis/v9"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"hyneo/internal/auth/code"
 	"hyneo/internal/config"
@@ -21,13 +22,13 @@ func RunServices(cfg *config.Config, service *code.Service, client *mysql.Client
 }
 
 func runVKLongServer(Client *mysql.Client, cfg *config.Config, code *code.Service, redis *redis.Client) services.Service {
-	token := cfg.VK.Token // use os.Getenv("TOKEN")
+	token := cfg.Social.VK.Token // use os.Getenv("TOKEN")
 	vk := api.NewVK(token)
 
 	service := vk3.NewVkService(Client, vk, code, redis, 0)
 	// get information about the group
 	group, err := vk.GroupsGetByID(api.Params{
-		"group_id": cfg.VK.GroupID,
+		"group_id": cfg.Social.VK.GroupID,
 	})
 	if err != nil {
 		log.Fatal(err)
@@ -46,7 +47,7 @@ func runVKLongServer(Client *mysql.Client, cfg *config.Config, code *code.Servic
 }
 
 func runTGServer(Client *mysql.Client, cfg *config.Config, code *code.Service, redis *redis.Client) services.Service {
-	bot, err := tgbotapi.NewBotAPI(cfg.Telegram.Token)
+	bot, err := tgbotapi.NewBotAPI(cfg.Social.Telegram.Token)
 	if err != nil {
 		log.Panic(err)
 	}

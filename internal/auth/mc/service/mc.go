@@ -1,8 +1,6 @@
 package service
 
 import (
-	codes "google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 	"hyneo/internal/auth"
 	"hyneo/internal/auth/mc"
 	"hyneo/internal/auth/password"
@@ -17,10 +15,6 @@ type service struct {
 	service password.Service
 }
 
-var (
-	IncorrectPassword = status.New(codes.Unauthenticated, "incorrect password").Err()
-)
-
 func NewMCService(client *mysql.Client, pservice password.Service) mc.Service {
 	return &service{
 		client:  client,
@@ -32,17 +26,17 @@ func (s *service) Login(username string, password string) (*auth.User, error) {
 	var user auth.User
 	err := s.client.DB.Model(&auth.User{Username: username}).First(&user).Error
 	if err != nil {
-		return nil, err
+		return nil, mc.UserNotFound
 	}
 	if !s.service.ComparePassword(user.PasswordHash, password) {
-		return nil, IncorrectPassword
+		return nil, mc.IncorrectPassword
 	}
 	user.Authorized = true
 	user.LastJoin = time.Now()
 	user.Session = time.Now().Add(time.Hour * 24)
 	err = s.client.DB.Save(&user).Error
 	if err != nil {
-		return nil, err
+		return nil, mc.Fault
 	}
 	return &user, nil
 }
@@ -51,7 +45,7 @@ func (s *service) Register(user *auth.User) (*auth.User, error) {
 	user.PasswordHash = s.service.CreatePassword(user.PasswordHash)
 	err := s.client.DB.Create(user).Error
 	if err != nil {
-		return nil, err
+		return nil, mc.Fault
 	}
 	return user, nil
 }
@@ -60,15 +54,15 @@ func (s *service) ChangePassword(username string, oldPassword string, newPasswor
 	var user auth.User
 	err := s.client.DB.Model(&auth.User{Username: username}).First(&user).Error
 	if err != nil {
-		return err
+		return mc.UserNotFound
 	}
 	if !s.service.ComparePassword(user.PasswordHash, oldPassword) {
-		return IncorrectPassword
+		return mc.IncorrectPassword
 	}
 	user.PasswordHash = s.service.CreatePassword(newPassword)
 	err = s.client.DB.Save(&user).Error
 	if err != nil {
-		return err
+		return mc.Fault
 	}
 	return nil
 }
@@ -77,12 +71,12 @@ func (s *service) Logout(username string) error {
 	var user auth.User
 	err := s.client.DB.Model(&auth.User{Username: username}).First(&user).Error
 	if err != nil {
-		return err
+		return mc.UserNotFound
 	}
 	user.Authorized = false
 	err = s.client.DB.Save(&user).Error
 	if err != nil {
-		return err
+		return mc.Fault
 	}
 	return nil
 }
@@ -91,7 +85,7 @@ func (s *service) LastLogin(username string) (string, error) {
 	var user auth.User
 	err := s.client.DB.Model(&auth.User{Username: username}).First(&user).Error
 	if err != nil {
-		return "", err
+		return "", mc.UserNotFound
 	}
 	return s.LeftTime(user.LastJoin), nil
 }
@@ -100,14 +94,14 @@ func (s *service) GetUser(username string) (*auth.User, error) {
 	var user auth.User
 	err := s.client.DB.Model(&auth.User{}).Where(&auth.User{Username: username}).First(&user).Error
 	if err != nil {
-		return nil, err
+		return nil, mc.UserNotFound
 	}
 	if user.Session.Sub(time.Now()) < 0 {
 		user.Authorized = false
 	}
 	err = s.client.DB.Save(&user).Error
 	if err != nil {
-		return nil, err
+		return nil, mc.Fault
 	}
 	return &user, nil
 }
@@ -116,11 +110,11 @@ func (s *service) UnRegister(username string) error {
 	var user auth.User
 	err := s.client.DB.Model(&auth.User{Username: username}).First(&user).Error
 	if err != nil {
-		return err
+		return mc.UserNotFound
 	}
 	err = s.client.DB.Delete(&user).Error
 	if err != nil {
-		return err
+		return mc.Fault
 	}
 	return nil
 }

@@ -3,7 +3,7 @@ package auth
 import "time"
 
 type User struct {
-	ID           int64     `json:"id"`
+	ID           uint32    `json:"id"`
 	Username     string    `json:"username"`
 	PasswordHash string    `json:"password_hash"`
 	RegisteredIP string    `json:"registered_ip"`

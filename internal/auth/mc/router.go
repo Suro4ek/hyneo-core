@@ -2,12 +2,8 @@ package mc
 
 import (
 	"context"
-	"errors"
-	"fmt"
 	"google.golang.org/protobuf/types/known/emptypb"
-	"gorm.io/gorm"
 	auth2 "hyneo/internal/auth"
-	"hyneo/internal/social/services"
 	"hyneo/pkg/mysql"
 	"hyneo/protos/auth"
 	"time"
@@ -15,7 +11,6 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-//TODO надо переделать id возравращение из string в int32, чтобы оно могла парситься с сервера
 type routerService struct {
 	client  *mysql.Client
 	service Service
@@ -35,14 +30,14 @@ func (r *routerService) Login(_ context.Context, res *auth.LoginRequest) (*auth.
 		return nil, err
 	}
 	return &auth.User{
-		Id:           fmt.Sprintf("%d", user.ID),
+		Id:           user.ID,
 		Username:     user.Username,
 		LastLogin:    timestamppb.New(user.LastJoin),
 		Ip:           user.IP,
 		RegisteredIp: user.RegisteredIP,
 		LastServer:   user.LastServer,
-		Session:      timestamppb.New(user.Session),
 		Auth:         user.Authorized,
+		LocaleId:     0,
 	}, nil
 }
 
@@ -61,14 +56,14 @@ func (r *routerService) Register(_ context.Context, res *auth.RegisterRequest) (
 		return nil, err
 	}
 	return &auth.User{
-		Id:           fmt.Sprintf("%d", user.ID),
+		Id:           user.ID,
 		Username:     user.Username,
 		LastLogin:    timestamppb.New(user.LastJoin),
 		Ip:           user.IP,
 		RegisteredIp: user.RegisteredIP,
 		LastServer:   user.LastServer,
-		Session:      timestamppb.New(user.Session),
 		Auth:         user.Authorized,
+		LocaleId:     0,
 	}, nil
 }
 
@@ -101,9 +96,6 @@ func (r *routerService) LastLogin(_ context.Context, res *auth.LastLoginRequest)
 func (r *routerService) GetUser(_ context.Context, res *auth.GetUserRequest) (*auth.GetUserResponse, error) {
 	user, err := r.service.GetUser(res.Username)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, services.UserNotFound
-		}
 		return nil, err
 	}
 	return &auth.GetUserResponse{
@@ -113,8 +105,8 @@ func (r *routerService) GetUser(_ context.Context, res *auth.GetUserRequest) (*a
 			Ip:           user.IP,
 			RegisteredIp: user.RegisteredIP,
 			LastServer:   user.LastServer,
-			Session:      timestamppb.New(user.Session),
 			Auth:         user.Authorized,
+			LocaleId:     0,
 		},
 	}, nil
 }

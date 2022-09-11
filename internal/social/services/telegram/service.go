@@ -138,7 +138,7 @@ func (s *telegramService) SendKeyboard(message string, chatId int64) {
 	var numericKeyboard tgbotapi.InlineKeyboardMarkup
 	if len(users) == 1 {
 		user := users[0].User
-		numericKeyboard = s.SoloUserKeyBoard(user.ID)
+		numericKeyboard = s.SoloUserKeyBoard(int64(user.ID))
 	} else {
 		numericKeyboard = tgbotapi.NewInlineKeyboardMarkup()
 		for _, user := range users {

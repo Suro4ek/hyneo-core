@@ -153,7 +153,7 @@ func (s *Service) SendKeyboard(message string, ChatID int64) {
 	keyboard := object.NewMessagesKeyboard(false)
 	if len(users) == 1 {
 		user := users[0].User
-		keyboard = s.SoloUserKeyBoard(user.ID)
+		keyboard = s.SoloUserKeyBoard(int64(user.ID))
 	} else {
 		for _, user := range users {
 			keyboard.AddRow()

@@ -2,9 +2,12 @@ package mc
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"google.golang.org/protobuf/types/known/emptypb"
+	"gorm.io/gorm"
 	auth2 "hyneo/internal/auth"
+	"hyneo/internal/social/services"
 	"hyneo/pkg/mysql"
 	"hyneo/protos/auth"
 	"time"
@@ -98,6 +101,9 @@ func (r *routerService) LastLogin(_ context.Context, res *auth.LastLoginRequest)
 func (r *routerService) GetUser(_ context.Context, res *auth.GetUserRequest) (*auth.GetUserResponse, error) {
 	user, err := r.service.GetUser(res.Username)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, services.UserNotFound
+		}
 		return nil, err
 	}
 	return &auth.GetUserResponse{

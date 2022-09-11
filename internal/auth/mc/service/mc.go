@@ -96,9 +96,9 @@ func (s *service) LastLogin(username string) (string, error) {
 	return s.LeftTime(user.LastJoin), nil
 }
 
-func (s *service) GetUser(id string) (*auth.User, error) {
+func (s *service) GetUser(username string) (*auth.User, error) {
 	var user auth.User
-	err := s.client.DB.Model(&auth.User{}).Where("id = ?", id).First(&user).Error
+	err := s.client.DB.Model(&auth.User{}).Where(&auth.User{Username: username}).First(&user).Error
 	if err != nil {
 		return nil, err
 	}

@@ -118,3 +118,27 @@ func (r *routerService) UnRegister(_ context.Context, res *auth.UnRegisterReques
 	}
 	return &emptypb.Empty{}, nil
 }
+
+func (r *routerService) UpdateUser(_ context.Context, res *auth.UpdateUserRequest) (*auth.User, error) {
+	user, err := r.service.UpdateUser(&auth2.User{
+		ID:         res.User.Id,
+		Username:   res.User.Username,
+		LastJoin:   res.User.LastLogin.AsTime(),
+		Authorized: res.User.Auth,
+		IP:         res.User.Ip,
+		LastServer: res.User.LastServer,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &auth.User{
+		Id:           user.ID,
+		Username:     user.Username,
+		LastLogin:    timestamppb.New(user.LastJoin),
+		Ip:           user.IP,
+		RegisteredIp: user.RegisteredIP,
+		LastServer:   user.LastServer,
+		Auth:         user.Authorized,
+		LocaleId:     0,
+	}, nil
+}

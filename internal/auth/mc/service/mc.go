@@ -122,3 +122,15 @@ func (s *service) UnRegister(username string) error {
 func (s *service) LeftTime(t time.Time) string {
 	return timediff.TimeDiff(t, timediff.WithLocale("ru-RU"))
 }
+
+func (s *service) UpdateUser(user *auth.User) (*auth.User, error) {
+	err := s.client.DB.Save(user).Error
+	if err != nil {
+		return nil, mc.Fault
+	}
+	err = s.client.DB.Find(&user).Scan(&user).Error
+	if err != nil {
+		return nil, mc.Fault
+	}
+	return user, nil
+}

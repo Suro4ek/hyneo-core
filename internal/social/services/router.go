@@ -6,7 +6,6 @@ import (
 	"hyneo/internal/auth"
 	"hyneo/pkg/mysql"
 	"hyneo/protos/service"
-	"strconv"
 )
 
 type serviceRouter struct {
@@ -24,11 +23,7 @@ func NewServiceRouter(client *mysql.Client, services []Service) service.ServiceS
 
 func (r *serviceRouter) NotifyServer(_ context.Context, res *service.NotifyServerRequest) (*emptypb.Empty, error) {
 	for _, s := range r.services {
-		userIdInt, err := strconv.ParseInt(res.GetUserId(), 10, 64)
-		if err != nil {
-			return nil, err
-		}
-		user, err := s.GetUserID(userIdInt)
+		user, err := s.GetUserID(int64(res.UserId))
 		if err != nil {
 			return nil, UserNotFound
 		}
@@ -42,11 +37,7 @@ func (r *serviceRouter) NotifyServer(_ context.Context, res *service.NotifyServe
 
 func (r *serviceRouter) Join(_ context.Context, res *service.JoinRequest) (*emptypb.Empty, error) {
 	for _, s := range r.services {
-		userIdInt, err := strconv.ParseInt(res.GetUserId(), 10, 64)
-		if err != nil {
-			return nil, err
-		}
-		user, err := s.GetUserID(userIdInt)
+		user, err := s.GetUserID(int64(res.UserId))
 		if err != nil {
 			return nil, UserNotFound
 		}

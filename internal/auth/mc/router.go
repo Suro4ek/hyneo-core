@@ -142,3 +142,11 @@ func (r *routerService) UpdateUser(_ context.Context, res *auth.UpdateUserReques
 		LocaleId:     0,
 	}, nil
 }
+
+func (r *routerService) UpdateLastServer(ctx context.Context, res *auth.UpdateLastServerRequest) (*emptypb.Empty, error) {
+	err := r.service.UpdateLastServer(int64(res.GetUserId()), res.GetLastServer())
+	if err != nil {
+		return nil, err
+	}
+	return &emptypb.Empty{}, nil
+}

@@ -15,4 +15,5 @@ type Service interface {
 	UnRegister(username string) error
 	LeftTime(t time.Time) string
 	UpdateUser(user *auth.User) (*auth.User, error)
+	UpdateLastServer(userId int64, server string) error
 }

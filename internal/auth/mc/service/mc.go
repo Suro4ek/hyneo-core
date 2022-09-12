@@ -135,3 +135,17 @@ func (s *service) UpdateUser(user *auth.User) (*auth.User, error) {
 	}
 	return user1, nil
 }
+
+func (s *service) UpdateLastServer(userId int64, server string) error {
+	user := &auth.User{}
+	err := s.client.DB.Model(&auth.User{ID: uint32(userId)}).First(user).Error
+	if err != nil {
+		return mc.Fault
+	}
+	user.LastServer = server
+	err = s.client.DB.Save(user).Error
+	if err != nil {
+		return mc.Fault
+	}
+	return nil
+}

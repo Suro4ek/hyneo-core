@@ -18,18 +18,13 @@ message CheckCodeRequest {
     string username = 2;
 }
 
-message LinkUserRequest {
-    string user_id = 1;
-    string vk_id = 2;
-}
-
 message NotifyServerRequest {
-    string user_id = 1;
+    uint32 user_id = 1;
     string server = 2;
 }
 
 message JoinRequest {
-    string user_id = 1;
+    uint32 user_id = 1;
     string ip = 2;
 }
 

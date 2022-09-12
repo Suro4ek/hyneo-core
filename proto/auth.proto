@@ -72,14 +72,14 @@ message GetUserResponse {
 }
 
 message User {
-    string id = 1;
+    uint32 id = 1;
     string username = 2;
     google.protobuf.Timestamp last_login = 3;
     string last_server = 4;
     string ip = 5;
     string registeredIp = 6;
     bool auth = 7;
-    google.protobuf.Timestamp session = 8;
+    int32 locale_id = 8;
 }
 
 message UnRegisterRequest {

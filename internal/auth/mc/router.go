@@ -2,7 +2,6 @@ package mc
 
 import (
 	"context"
-	"fmt"
 	"google.golang.org/protobuf/types/known/emptypb"
 	auth2 "hyneo/internal/auth"
 	"hyneo/pkg/mysql"
@@ -12,7 +11,6 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-//TODO надо переделать id возравращение из string в int32, чтобы оно могла парситься с сервера
 type routerService struct {
 	client  *mysql.Client
 	service Service
@@ -32,14 +30,14 @@ func (r *routerService) Login(_ context.Context, res *auth.LoginRequest) (*auth.
 		return nil, err
 	}
 	return &auth.User{
-		Id:           fmt.Sprintf("%d", user.ID),
+		Id:           user.ID,
 		Username:     user.Username,
 		LastLogin:    timestamppb.New(user.LastJoin),
 		Ip:           user.IP,
 		RegisteredIp: user.RegisteredIP,
 		LastServer:   user.LastServer,
-		Session:      timestamppb.New(user.Session),
 		Auth:         user.Authorized,
+		LocaleId:     0,
 	}, nil
 }
 
@@ -58,14 +56,14 @@ func (r *routerService) Register(_ context.Context, res *auth.RegisterRequest) (
 		return nil, err
 	}
 	return &auth.User{
-		Id:           fmt.Sprintf("%d", user.ID),
+		Id:           user.ID,
 		Username:     user.Username,
 		LastLogin:    timestamppb.New(user.LastJoin),
 		Ip:           user.IP,
 		RegisteredIp: user.RegisteredIP,
 		LastServer:   user.LastServer,
-		Session:      timestamppb.New(user.Session),
 		Auth:         user.Authorized,
+		LocaleId:     0,
 	}, nil
 }
 
@@ -107,8 +105,8 @@ func (r *routerService) GetUser(_ context.Context, res *auth.GetUserRequest) (*a
 			Ip:           user.IP,
 			RegisteredIp: user.RegisteredIP,
 			LastServer:   user.LastServer,
-			Session:      timestamppb.New(user.Session),
 			Auth:         user.Authorized,
+			LocaleId:     0,
 		},
 	}, nil
 }
@@ -119,4 +117,28 @@ func (r *routerService) UnRegister(_ context.Context, res *auth.UnRegisterReques
 		return nil, err
 	}
 	return &emptypb.Empty{}, nil
+}
+
+func (r *routerService) UpdateUser(_ context.Context, res *auth.UpdateUserRequest) (*auth.User, error) {
+	user, err := r.service.UpdateUser(&auth2.User{
+		ID:         res.User.Id,
+		Username:   res.User.Username,
+		LastJoin:   res.User.LastLogin.AsTime(),
+		Authorized: res.User.Auth,
+		IP:         res.User.Ip,
+		LastServer: res.User.LastServer,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &auth.User{
+		Id:           user.ID,
+		Username:     user.Username,
+		LastLogin:    timestamppb.New(user.LastJoin),
+		Ip:           user.IP,
+		RegisteredIp: user.RegisteredIP,
+		LastServer:   user.LastServer,
+		Auth:         user.Authorized,
+		LocaleId:     0,
+	}, nil
 }

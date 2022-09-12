@@ -2,6 +2,7 @@ package telegram
 
 import (
 	"context"
+	"github.com/go-redis/redis/v9"
 	"hyneo/internal/auth"
 	"hyneo/internal/social/services"
 	command2 "hyneo/internal/social/services/command"

@@ -14,4 +14,5 @@ type Service interface {
 	GetUser(id string) (*auth.User, error)
 	UnRegister(username string) error
 	LeftTime(t time.Time) string
+	UpdateUser(user *auth.User) (*auth.User, error)
 }

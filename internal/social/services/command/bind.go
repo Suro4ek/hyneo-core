@@ -38,7 +38,7 @@ var Bind = &Command{
 			service.SendMessage("Не удалось выполнить команду", msg.ChatID)
 			return
 		}
-		user, err := service.GetUserID(mcuser.ID)
+		user, err := service.GetUserID(int64(mcuser.ID))
 		if err != nil {
 			if !errors.As(err, &gorm.ErrRecordNotFound) {
 				service.SendMessage("Не удалось выполнить команду", msg.ChatID)

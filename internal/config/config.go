@@ -21,26 +21,26 @@ type Social struct {
 }
 
 type MySQL struct {
-	Host     string `yaml:"host"`
-	Port     string `yaml:"port"`
-	User     string `yaml:"user"`
-	Password string `yaml:"pass"`
-	DB       string `yaml:"db"`
+	Host     string `yaml:"host" env:"MYSQL_HOST"`
+	Port     string `yaml:"port" env:"MYSQL_PORT"`
+	User     string `yaml:"user" env:"MYSQL_USER"`
+	Password string `yaml:"pass" env:"MYSQL_PASSWORD"`
+	DB       string `yaml:"db" env:"MYSQL_DB"`
 }
 
 type Redis struct {
-	Host string `yaml:"host"`
-	Port string `yaml:"port"`
-	Pass string `yaml:"pass"`
+	Host string `yaml:"host" env:"REDIS_HOST"`
+	Port string `yaml:"port" env:"REDIS_PORT"`
+	Pass string `yaml:"pass" env:"REDIS_PASS"`
 }
 
 type VKConfig struct {
-	GroupID int64  `yaml:"group_id"`
-	Token   string `yaml:"token"`
+	GroupID int64  `yaml:"group_id" env:"VK_GROUP_ID"`
+	Token   string `yaml:"token" env:"VK_TOKEN"`
 }
 
 type TelegramConfig struct {
-	Token string `yaml:"token"`
+	Token string `yaml:"token" env:"TELEGRAM_TOKEN"`
 }
 
 type (

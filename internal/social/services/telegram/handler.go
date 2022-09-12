@@ -53,6 +53,9 @@ func (h *handler) Message() {
 				return
 			}
 			cmd, userId := h.GetCommandByPayload(update.CallbackQuery.Data)
+			if cmd == nil {
+				return
+			}
 			if cmd.WithoutUser {
 				go cmd.Exec(update.CallbackQuery.Message, &auth.LinkUser{}, *h.service)
 				return

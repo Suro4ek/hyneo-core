@@ -61,7 +61,7 @@ func (r *serviceRouter) CheckCode(_ context.Context, res *service.CheckCodeReque
 			return nil, InvalidCode
 		}
 		if VkID.Service != ser.ServiceID {
-			return &emptypb.Empty{}, nil
+			continue
 		}
 		if !ser.Code.CompareCode(res.GetUsername(), res.GetCode()) {
 			return nil, InvalidCode

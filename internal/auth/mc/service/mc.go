@@ -147,7 +147,7 @@ func (s *service) UpdateUser(user *auth.User) (*auth.User, error) {
 		s.log.Error(err)
 		return nil, mc.Fault
 	}
-	err = s.client.DB.Model(user1).Updates(&user).Scan(user1).Error
+	err = s.client.DB.Model(user1).Updates(*user).Scan(user1).Error
 	if err != nil {
 		s.log.Error(err)
 		return nil, mc.Fault

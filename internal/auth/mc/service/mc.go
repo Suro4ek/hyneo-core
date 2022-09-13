@@ -142,7 +142,7 @@ func (s *service) LeftTime(t time.Time) string {
 
 func (s *service) UpdateUser(user *auth.User) (*auth.User, error) {
 	user1 := &auth.User{}
-	err := s.client.DB.Find(user).Scan(user1).Error
+	err := s.client.DB.Model(&auth.User{ID: user.ID}).First(user1).Error
 	if err != nil {
 		s.log.Error(err)
 		return nil, mc.Fault

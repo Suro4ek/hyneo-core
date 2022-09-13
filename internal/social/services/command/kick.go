@@ -18,7 +18,7 @@ var Kick = &Command{
 		out, _ := json.Marshal(services.RedisSend{
 			Channel: "kick",
 			UserId:  fmt.Sprintf("%d", user.UserID),
-			Message: "§cВы кикнуты из игры с помощью бота ВК",
+			Message: "§cВы кикнуты из игры с помощью бота",
 		})
 		ser.Redis.Publish(context.Background(), "messenger.bungee", string(out))
 		service.SendMessage("Вы кикнули ", msg.ChatID)

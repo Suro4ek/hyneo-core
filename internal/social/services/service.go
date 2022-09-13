@@ -4,6 +4,7 @@ import (
 	"github.com/go-redis/redis/v9"
 	"hyneo/internal/auth"
 	"hyneo/internal/auth/code"
+	"hyneo/internal/auth/password"
 	"hyneo/pkg/mysql"
 )
 
@@ -30,6 +31,7 @@ type GetService struct {
 	Client    *mysql.Client
 	Code      *code.Service
 	Redis     *redis.Client
+	Password  password.Service
 }
 
 type RedisSend struct {

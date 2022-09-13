@@ -17,7 +17,6 @@ import (
 	"hyneo/pkg/redis"
 	"hyneo/protos/auth"
 	serviceRouter "hyneo/protos/service"
-	"log"
 	"net"
 )
 
@@ -35,9 +34,13 @@ func main() {
 	codeService := &code.Service{
 		Client: redisClient,
 	}
-	runServices := RunServices(cfg, codeService, client, redisClient)
+	logger.Info("Register services")
+	passwordService := password.NewPasswordService()
+	runServices := RunServices(cfg, codeService, client, redisClient, &logger, passwordService)
+	logger.Info("Register commands")
 	command.RegisterCommands()
-	runGRPCServer(runServices, client, *cfg)
+	logger.Info("Run GRPC Server")
+	runGRPCServer(runServices, client, *cfg, &logger, passwordService)
 }
 
 func migrate(client *mysql.Client) {
@@ -51,7 +54,7 @@ func migrate(client *mysql.Client) {
 	}
 }
 
-func runGRPCServer(servicess []services2.Service, client *mysql.Client, cfg config.Config) {
+func runGRPCServer(servicess []services2.Service, client *mysql.Client, cfg config.Config, log *logging.Logger, passwordService password.Service) {
 	addr := "0.0.0.0:" + cfg.GRPCPort
 	lis, err := net.Listen("tcp", addr)
 	if err != nil {
@@ -59,8 +62,7 @@ func runGRPCServer(servicess []services2.Service, client *mysql.Client, cfg conf
 	}
 	s := grpc.NewServer()
 
-	passwordService := password.NewPasswordService()
-	serviceAuth := service2.NewMCService(client, passwordService)
+	serviceAuth := service2.NewMCService(client, passwordService, log)
 	authService := mc.NewAuthRouter(client, serviceAuth)
 	auth.RegisterAuthServer(s, authService)
 

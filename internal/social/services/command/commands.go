@@ -12,6 +12,9 @@ func RegisterCommands() {
 	RegisterCommand(Account)
 	RegisterCommand(Accounts)
 	RegisterCommand(Kick)
+	RegisterCommand(Notify)
+	RegisterCommand(Ban)
+	RegisterCommand(Restore)
 }
 
 func GetCommands() map[string]*Command {

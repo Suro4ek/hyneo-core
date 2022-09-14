@@ -27,7 +27,7 @@ func NewMCService(client *mysql.Client, pservice password.Service, log *logging.
 
 func (s *service) Login(username string, password string) (*auth.User, error) {
 	var user auth.User
-	err := s.client.DB.Model(&auth.User{Username: username}).First(&user).Error
+	err := s.client.DB.Model(&auth.User{}).Where(&auth.User{Username: username}).First(&user).Error
 	if err != nil {
 		s.log.Error(err)
 		return nil, mc.UserNotFound
@@ -49,7 +49,8 @@ func (s *service) Login(username string, password string) (*auth.User, error) {
 
 func (s *service) Register(user *auth.User) (*auth.User, error) {
 	user.PasswordHash = s.service.CreatePassword(user.PasswordHash)
-	err := s.client.DB.Create(user).Error
+	user.Session = time.Now().Add(time.Hour * 24)
+	err := s.client.DB.Create(user).Where(&auth.User{Username: user.Username}).First(user).Error
 	if err != nil {
 		s.log.Error(err)
 		return nil, mc.Fault
@@ -59,7 +60,7 @@ func (s *service) Register(user *auth.User) (*auth.User, error) {
 
 func (s *service) ChangePassword(username string, oldPassword string, newPassword string) error {
 	var user auth.User
-	err := s.client.DB.Model(&auth.User{Username: username}).First(&user).Error
+	err := s.client.DB.Model(&auth.User{}).Where(&auth.User{Username: username}).First(&user).Error
 	if err != nil {
 		s.log.Error(err)
 		return mc.UserNotFound
@@ -79,7 +80,7 @@ func (s *service) ChangePassword(username string, oldPassword string, newPasswor
 
 func (s *service) Logout(username string) error {
 	var user auth.User
-	err := s.client.DB.Model(&auth.User{Username: username}).First(&user).Error
+	err := s.client.DB.Model(&auth.User{}).Where(&auth.User{Username: username}).First(&user).Error
 	if err != nil {
 		s.log.Error(err)
 		return mc.UserNotFound
@@ -95,7 +96,7 @@ func (s *service) Logout(username string) error {
 
 func (s *service) LastLogin(username string) (string, error) {
 	var user auth.User
-	err := s.client.DB.Model(&auth.User{Username: username}).First(&user).Error
+	err := s.client.DB.Model(auth.User{}).Where(&auth.User{Username: username}).First(&user).Error
 	if err != nil {
 		s.log.Error(err)
 		return "", mc.UserNotFound
@@ -123,7 +124,7 @@ func (s *service) GetUser(username string) (*auth.User, error) {
 
 func (s *service) UnRegister(username string) error {
 	var user auth.User
-	err := s.client.DB.Model(&auth.User{Username: username}).First(&user).Error
+	err := s.client.DB.Model(&auth.User{}).Where(&auth.User{Username: username}).First(&user).Error
 	if err != nil {
 		s.log.Error(err)
 		return mc.UserNotFound
@@ -142,12 +143,12 @@ func (s *service) LeftTime(t time.Time) string {
 
 func (s *service) UpdateUser(user *auth.User) (*auth.User, error) {
 	user1 := &auth.User{}
-	err := s.client.DB.Model(&auth.User{ID: user.ID}).First(user1).Error
+	err := s.client.DB.Model(&auth.User{}).Where(&auth.User{ID: user.ID}).First(user1).Error
 	if err != nil {
 		s.log.Error(err)
 		return nil, mc.Fault
 	}
-	err = s.client.DB.Model(user1).Updates(*user).Scan(user1).Error
+	err = s.client.DB.Model(user1).Where(&auth.User{ID: user.ID}).Omit("id").Updates(*user).First(user1).Error
 	if err != nil {
 		s.log.Error(err)
 		return nil, mc.Fault
@@ -157,7 +158,7 @@ func (s *service) UpdateUser(user *auth.User) (*auth.User, error) {
 
 func (s *service) UpdateLastServer(userId int64, server string) error {
 	user := &auth.User{}
-	err := s.client.DB.Model(&auth.User{ID: uint32(userId)}).First(user).Error
+	err := s.client.DB.Model(&auth.User{}).Where(&auth.User{ID: uint32(userId)}).First(user).Error
 	if err != nil {
 		s.log.Error(err)
 		return mc.Fault

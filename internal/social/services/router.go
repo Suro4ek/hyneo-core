@@ -27,6 +27,9 @@ func (r *serviceRouter) NotifyServer(_ context.Context, res *service.NotifyServe
 		if err != nil {
 			return nil, UserNotFound
 		}
+		if !user.Notificated {
+			return &emptypb.Empty{}, nil
+		}
 		if user.ServiceId != s.GetService().ServiceID {
 			continue
 		}
@@ -40,6 +43,9 @@ func (r *serviceRouter) Join(_ context.Context, res *service.JoinRequest) (*empt
 		user, err := s.GetUserID(int64(res.UserId))
 		if err != nil {
 			return nil, UserNotFound
+		}
+		if !user.Notificated {
+			return &emptypb.Empty{}, nil
 		}
 		if user.ServiceId != s.GetService().ServiceID {
 			continue
@@ -70,6 +76,9 @@ func (r *serviceRouter) CheckCode(_ context.Context, res *service.CheckCodeReque
 			ServiceUserID: VkID.UserID,
 			User:          *user,
 			ServiceId:     ser.ServiceID,
+			Notificated:   true,
+			Banned:        false,
+			DoubleAuth:    false,
 		}
 		err = ser.Client.DB.Save(vkUser).Error
 		if err != nil {

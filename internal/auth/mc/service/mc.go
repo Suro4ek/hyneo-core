@@ -50,6 +50,8 @@ func (s *service) Login(username string, password string) (*auth.User, error) {
 func (s *service) Register(user *auth.User) (*auth.User, error) {
 	user.PasswordHash = s.service.CreatePassword(user.PasswordHash)
 	user.Session = time.Now().Add(time.Hour * 24)
+	user.Authorized = true
+	user.LastJoin = time.Now()
 	err := s.client.DB.Create(user).Where(&auth.User{Username: user.Username}).First(user).Error
 	if err != nil {
 		s.log.Error(err)
@@ -148,6 +150,7 @@ func (s *service) UpdateUser(user *auth.User) (*auth.User, error) {
 		s.log.Error(err)
 		return nil, mc.Fault
 	}
+	user.LastJoin = time.Now()
 	err = s.client.DB.Model(user1).Where(&auth.User{ID: user.ID}).Omit("id").Updates(*user).First(user1).Error
 	if err != nil {
 		s.log.Error(err)

@@ -49,6 +49,9 @@ func (s *telegramService) SendMessage(message string, chatID int64) {
 	}
 }
 
+/*
+	Получение данных сервиса
+*/
 func (s *telegramService) GetService() *services.GetService {
 	return &services.GetService{
 		ServiceID: s.ServiceID,
@@ -72,6 +75,9 @@ func (s *telegramService) GetUser(ID int64) (user1 []auth.LinkUser, err error) {
 	return users, nil
 }
 
+/*
+	Получение *auth.User по никнейму в игре
+*/
 func (s *telegramService) GetMCUser(username string) (*auth.User, error) {
 	var user auth.User
 	err := s.Client.DB.Model(&auth.User{}).Where("username = ?", username).First(&user).Error
@@ -82,6 +88,9 @@ func (s *telegramService) GetMCUser(username string) (*auth.User, error) {
 	return &user, nil
 }
 
+/*
+	Получение
+*/
 func (s *telegramService) GetUserID(userId int64) (user1 *auth.LinkUser, err error) {
 	var user auth.LinkUser
 	err = s.Client.DB.Model(&auth.LinkUser{}).Joins("User").Where(auth.LinkUser{

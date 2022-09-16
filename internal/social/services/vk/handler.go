@@ -27,6 +27,8 @@ func NewVKHandler(lp *longpoll.LongPoll, service *services.Service) *handler {
 	}
 }
 
+// Message
+// функция обработки сообщений из вконтакте
 func (h *handler) Message() {
 	h.lp.MessageNew(func(_ context.Context, m events.MessageNewObject) {
 		mstr := strings.TrimSpace(m.Message.Text)
@@ -86,6 +88,10 @@ func (h *handler) Message() {
 	}
 }
 
+/*
+	Функция нахождение команды по payload
+	Возращяет указатель на команду может быть nil и userId из auth.LinkUser
+*/
 func (h *handler) GetCommandByPayload(payload string) (cmd *command2.Command, userId string) {
 	for _, cmd := range command2.GetCommands() {
 		if strings.HasPrefix(payload, cmd.Payload) {

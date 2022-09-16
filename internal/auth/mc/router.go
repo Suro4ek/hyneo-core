@@ -100,6 +100,7 @@ func (r *routerService) GetUser(_ context.Context, res *auth.GetUserRequest) (*a
 	}
 	return &auth.GetUserResponse{
 		User: &auth.User{
+			Id:           user.ID,
 			Username:     user.Username,
 			LastLogin:    timestamppb.New(user.LastJoin),
 			Ip:           user.IP,

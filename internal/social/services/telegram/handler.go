@@ -25,6 +25,8 @@ func NewTelegramHandler(bot *tgbotapi.BotAPI, service *services.Service) *handle
 	}
 }
 
+// Message
+// функция обработки сообщений из телеграмма
 func (h *handler) Message() {
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
@@ -98,6 +100,10 @@ func (h *handler) Message() {
 	}
 }
 
+/*
+	Функция нахождение команды по payload
+	Возращяет указатель на команду может быть nil и userId из auth.LinkUser
+*/
 func (h *handler) GetCommandByPayload(payload string) (cmd *command2.Command, userId string) {
 	for _, cmd := range command2.GetCommands() {
 		if strings.HasPrefix(payload, cmd.Payload) {
@@ -107,6 +113,10 @@ func (h *handler) GetCommandByPayload(payload string) (cmd *command2.Command, us
 	return nil, ""
 }
 
+/*
+	Функция нахождение команды по названию команды
+	возвращяет указатель на команду может быть и nil
+*/
 func (h *handler) GetCommand(cmd1 string) *command2.Command {
 	for _, cmd := range command2.GetCommands() {
 		for _, alias := range cmd.Alias {

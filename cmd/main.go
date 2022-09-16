@@ -44,11 +44,11 @@ func main() {
 }
 
 func migrate(client *mysql.Client) {
-	err := client.DB.AutoMigrate(&auth2.LinkUser{})
+	err := client.DB.AutoMigrate(&auth2.User{})
 	if err != nil {
 		return
 	}
-	err = client.DB.AutoMigrate(&auth2.User{})
+	err = client.DB.AutoMigrate(&auth2.LinkUser{})
 	if err != nil {
 		return
 	}

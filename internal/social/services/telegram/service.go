@@ -7,7 +7,6 @@ import (
 	"hyneo/internal/auth"
 	"hyneo/internal/auth/code"
 	"hyneo/internal/auth/password"
-	"hyneo/internal/social/keyboard"
 	"hyneo/internal/social/services"
 	"hyneo/pkg/logging"
 	"hyneo/pkg/mysql"
@@ -115,9 +114,9 @@ func (s *telegramService) ClearKeyboard(message string, chatID int64) {
 	s.SendMessage(message, chatID)
 }
 
-func (s *telegramService) AccountKeyboard(message string, chatID int64, userID int64) {
+func (s *telegramService) AccountKeyboard(message string, chatID int64, user auth.LinkUser) {
 	msg := tgbotapi.NewMessage(chatID, message)
-	keyBoard := s.SoloUserKeyBoard(userID)
+	keyBoard := s.SoloUserKeyBoard(user)
 	keyBoard.InlineKeyboard = append(keyBoard.InlineKeyboard,
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Назад", "accounts"),
@@ -129,30 +128,35 @@ func (s *telegramService) AccountKeyboard(message string, chatID int64, userID i
 	}
 }
 
-func (s *telegramService) SoloUserKeyBoard(userId int64) tgbotapi.InlineKeyboardMarkup {
+func (s *telegramService) SoloUserKeyBoard(user auth.LinkUser) tgbotapi.InlineKeyboardMarkup {
 	buttons := tgbotapi.NewInlineKeyboardMarkup()
-	for _, keyboardConfig := range keyboard.Keyboard {
-		row := tgbotapi.NewInlineKeyboardRow()
-		for _, button := range keyboardConfig.KeyboardButtons {
-			row = append(row, tgbotapi.NewInlineKeyboardButtonData(button.Name, fmt.Sprintf("%s %d", button.Payload, userId)))
-		}
-		buttons.InlineKeyboard = append(buttons.InlineKeyboard, row)
+	buttons.InlineKeyboard = append(buttons.InlineKeyboard, tgbotapi.NewInlineKeyboardRow(
+		tgbotapi.NewInlineKeyboardButtonData("Информация о аккаунте", fmt.Sprintf("status %d", user.User.ID))))
+	rowChange := tgbotapi.NewInlineKeyboardRow()
+	if user.Notificated {
+		rowChange = append(rowChange, tgbotapi.NewInlineKeyboardButtonData("Отключить уведомления", fmt.Sprintf("notify %d", user.User.ID)))
+	} else {
+		rowChange = append(rowChange, tgbotapi.NewInlineKeyboardButtonData("Включить уведомления", fmt.Sprintf("notify %d", user.User.ID)))
 	}
+	if user.Banned {
+		rowChange = append(rowChange, tgbotapi.NewInlineKeyboardButtonData("Разбанить", fmt.Sprintf("ban %d", user.User.ID)))
+	} else {
+		rowChange = append(rowChange, tgbotapi.NewInlineKeyboardButtonData("Забанить", fmt.Sprintf("ban %d", user.User.ID)))
+	}
+	buttons.InlineKeyboard = append(buttons.InlineKeyboard, rowChange)
+	buttons.InlineKeyboard = append(buttons.InlineKeyboard, tgbotapi.NewInlineKeyboardRow(
+		tgbotapi.NewInlineKeyboardButtonData("Кикнуть", fmt.Sprintf("kick %d", user.User.ID)),
+		tgbotapi.NewInlineKeyboardButtonData("Восставновить", fmt.Sprintf("restore %d", user.User.ID)),
+		tgbotapi.NewInlineKeyboardButtonData("Отвязать", fmt.Sprintf("unlink %d", user.User.ID)),
+	))
+	//for _, keyboardConfig := range keyboard.Keyboard {
+	//	row := tgbotapi.NewInlineKeyboardRow()
+	//	for _, button := range keyboardConfig.KeyboardButtons {
+	//		row = append(row, tgbotapi.NewInlineKeyboardButtonData(button.Name, fmt.Sprintf("%s %d", button.Payload, userId)))
+	//	}
+	//	buttons.InlineKeyboard = append(buttons.InlineKeyboard, row)
+	//}
 	return buttons
-	//return tgbotapi.NewInlineKeyboardMarkup(
-	//	tgbotapi.NewInlineKeyboardRow(
-	//		tgbotapi.NewInlineKeyboardButtonData("Информацаия о аккаунте", fmt.Sprintf("status %d", userId)),
-	//	),
-	//	tgbotapi.NewInlineKeyboardRow(
-	//		tgbotapi.NewInlineKeyboardButtonData("Переключить блокировку", fmt.Sprintf("ban %d", userId)),
-	//		tgbotapi.NewInlineKeyboardButtonData("Переключить уведомления", fmt.Sprintf("notify %d", userId)),
-	//	),
-	//	tgbotapi.NewInlineKeyboardRow(
-	//		tgbotapi.NewInlineKeyboardButtonData("Кикнуть", fmt.Sprintf("kick %d", userId)),
-	//		tgbotapi.NewInlineKeyboardButtonData("Восставноить", fmt.Sprintf("ban %d", userId)),
-	//		tgbotapi.NewInlineKeyboardButtonData("Отвязать аккаунт", fmt.Sprintf("unlink %d", userId)),
-	//	),
-	//)
 }
 
 func (s *telegramService) SendKeyboard(message string, chatId int64) {
@@ -166,8 +170,8 @@ func (s *telegramService) SendKeyboard(message string, chatId int64) {
 	}
 	var numericKeyboard tgbotapi.InlineKeyboardMarkup
 	if len(users) == 1 {
-		user := users[0].User
-		numericKeyboard = s.SoloUserKeyBoard(int64(user.ID))
+		user := users[0]
+		numericKeyboard = s.SoloUserKeyBoard(user)
 	} else {
 		numericKeyboard = tgbotapi.NewInlineKeyboardMarkup()
 		for _, user := range users {

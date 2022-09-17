@@ -10,7 +10,6 @@ import (
 	"hyneo/internal/auth"
 	"hyneo/internal/auth/code"
 	"hyneo/internal/auth/password"
-	"hyneo/internal/social/keyboard"
 	"hyneo/internal/social/services"
 	"hyneo/pkg/logging"
 	"hyneo/pkg/mysql"
@@ -124,14 +123,31 @@ func (s *Service) ClearKeyboard(message string, chadID int64) {
 	}
 }
 
-func (s *Service) SoloUserKeyBoard(userID int64) *object.MessagesKeyboard {
+func (s *Service) SoloUserKeyBoard(user auth.LinkUser) *object.MessagesKeyboard {
 	buttons := object.NewMessagesKeyboard(false)
-	for _, keyboardConfig := range keyboard.Keyboard {
-		buttons.AddRow()
-		for _, button := range keyboardConfig.KeyboardButtons {
-			buttons.AddTextButton(button.Name, fmt.Sprintf("%s %d", button.Payload, userID), button.Color)
-		}
+	buttons.AddRow()
+	buttons.AddTextButton("Информация о аккаунте", fmt.Sprintf("status %d", user.User.ID), "primary")
+	buttons.AddRow()
+	if user.Notificated {
+		buttons.AddTextButton("Отключить уведомления", fmt.Sprintf("notify %d", user.User.ID), "negative")
+	} else {
+		buttons.AddTextButton("Включить уведомления", fmt.Sprintf("notify %d", user.User.ID), "positive")
 	}
+	if user.Banned {
+		buttons.AddTextButton("Разбанить", fmt.Sprintf("ban %d", user.User.ID), "positive")
+	} else {
+		buttons.AddTextButton("Забанить", fmt.Sprintf("ban %d", user.User.ID), "negative")
+	}
+	buttons.AddRow()
+	buttons.AddTextButton("Кикнуть", fmt.Sprintf("kick %d", user.User.ID), "negative")
+	buttons.AddTextButton("Восставновить", fmt.Sprintf("restore %d", user.User.ID), "positive")
+	buttons.AddTextButton("Отвязать", fmt.Sprintf("unlink %d", user.User.ID), "negative")
+	//for _, keyboardConfig := range keyboard.Keyboard {
+	//	buttons.AddRow()
+	//	for _, button := range keyboardConfig.KeyboardButtons {
+	//		buttons.AddTextButton(button.Name, fmt.Sprintf("%s %d", button.Payload, userID), button.Color)
+	//	}
+	//}
 	//keyboard.AddRow()
 	//keyboard.AddTextButton("Статус", fmt.Sprintf("status %d", userID), "primary")
 	//keyboard.AddRow()
@@ -144,9 +160,9 @@ func (s *Service) SoloUserKeyBoard(userID int64) *object.MessagesKeyboard {
 	return buttons
 }
 
-func (s *Service) AccountKeyboard(message string, chatID int64, userID int64) {
+func (s *Service) AccountKeyboard(message string, chatID int64, user auth.LinkUser) {
 	m := params.NewMessagesSendBuilder()
-	soloUserKeyBoard := s.SoloUserKeyBoard(userID)
+	soloUserKeyBoard := s.SoloUserKeyBoard(user)
 	soloUserKeyBoard.AddTextButton("Назад", "accounts", "secondary")
 	m.Message(message)
 	m.PeerID(int(chatID))
@@ -171,8 +187,8 @@ func (s *Service) SendKeyboard(message string, ChatID int64) {
 	}
 	messagesKeyboard := object.NewMessagesKeyboard(false)
 	if len(users) == 1 {
-		user := users[0].User
-		messagesKeyboard = s.SoloUserKeyBoard(int64(user.ID))
+		user := users[0]
+		messagesKeyboard = s.SoloUserKeyBoard(user)
 	} else {
 		for _, user := range users {
 			messagesKeyboard.AddRow()

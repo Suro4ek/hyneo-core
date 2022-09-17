@@ -14,7 +14,7 @@ type Service interface {
 	//SendKeyboard Отправка клавиатуры может быть и с несколькими пользователями
 	SendKeyboard(message string, chatID int64)
 	//AccountKeyboard Отправка клавиатуры конкретного пользователя
-	AccountKeyboard(message string, chatID int64, userID int64)
+	AccountKeyboard(message string, chatID int64, user auth.LinkUser)
 	//ClearKeyboard Очистка клавиатуры
 	ClearKeyboard(message string, chatID int64)
 

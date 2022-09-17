@@ -28,7 +28,7 @@ var Ban = &Command{
 				Message: "§cВы забанены на сервере с помощью бота",
 			})
 			ser.Redis.Publish(context.Background(), "messenger.bungee", string(out))
-			service.SendMessage("Вы забанили "+user.User.Username, msg.ChatID)
+			service.AccountKeyboard("Вы забанили "+user.User.Username, msg.ChatID, *user)
 		} else {
 			out, _ := json.Marshal(services.RedisSend{
 				Channel: "unban",
@@ -36,7 +36,7 @@ var Ban = &Command{
 				Message: "§cВы разбанены на сервере с помощью бота",
 			})
 			ser.Redis.Publish(context.Background(), "messenger.bungee", string(out))
-			service.SendMessage("Вы разбанили "+user.User.Username, msg.ChatID)
+			service.AccountKeyboard("Вы разбанили "+user.User.Username, msg.ChatID, *user)
 		}
 
 	},

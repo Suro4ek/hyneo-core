@@ -9,7 +9,6 @@ import (
 	service2 "hyneo/internal/auth/mc/service"
 	"hyneo/internal/auth/password"
 	"hyneo/internal/config"
-	"hyneo/internal/social/keyboard"
 	services2 "hyneo/internal/social/services"
 	"hyneo/internal/social/services/command"
 	"hyneo/pkg/logging"
@@ -25,7 +24,6 @@ func main() {
 	logger := logging.GetLogger()
 	cfg := config.GetConfig()
 	client := mysql.NewClient(context.Background(), 5, cfg.MySQL)
-	keyboard.Init(cfg.Social.Keyboard)
 	redisClient, err := redis.NewClient(context.Background(), cfg.Redis)
 	if err != nil {
 		logger.Fatal(err)

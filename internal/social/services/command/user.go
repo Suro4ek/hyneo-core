@@ -14,12 +14,12 @@ var Account = &Command{
 		users, err := service.GetUser(msg.ChatID)
 		if err != nil || user == nil {
 			if users != nil && len(users) == 1 {
-				service.AccountKeyboard("Этот аккаунт не привязан к вам", msg.ChatID, users[0].UserID)
+				service.AccountKeyboard("Этот аккаунт не привязан к вам", msg.ChatID, users[0])
 			} else {
 				service.ClearKeyboard("Этот аккаунт не привязан к вам", msg.ChatID)
 			}
 			return
 		}
-		service.AccountKeyboard("Настройки аккаунта "+user.User.Username, msg.ChatID, user.ID)
+		service.AccountKeyboard("Настройки аккаунта "+user.User.Username, msg.ChatID, *user)
 	},
 }

@@ -2,6 +2,7 @@ package telegram
 
 import (
 	"context"
+	"fmt"
 	"github.com/go-redis/redis/v9"
 	"hyneo/internal/auth"
 	"hyneo/internal/social/services"
@@ -49,12 +50,14 @@ func (h *handler) Message() {
 				}
 			}
 		} else if update.CallbackQuery != nil {
+			//TODO заменить на текст
 			callback := tgbotapi.NewCallback(update.CallbackQuery.ID, update.CallbackQuery.Data)
 			_, err := h.bot.Request(callback)
 			if err != nil {
 				return
 			}
 			cmd, userId := h.GetCommandByPayload(update.CallbackQuery.Data)
+			fmt.Println(cmd)
 			if cmd == nil {
 				return
 			}

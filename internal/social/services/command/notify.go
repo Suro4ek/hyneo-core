@@ -18,6 +18,7 @@ var Notify = &Command{
 			service.SendMessage("Не удалось выполнить команду", msg.ChatID)
 			return
 		}
+		user.Notificated = !user.Notificated
 		if user.Notificated {
 			service.AccountKeyboard("Вы отписались от уведомлений", msg.ChatID, *user)
 		} else {

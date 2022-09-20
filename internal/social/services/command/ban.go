@@ -21,6 +21,7 @@ var Ban = &Command{
 			service.SendMessage("Не удалось выполнить команду", msg.ChatID)
 			return
 		}
+		user.Banned = !user.Banned
 		if !user.Banned {
 			out, _ := json.Marshal(services.RedisSend{
 				Channel: "ban",

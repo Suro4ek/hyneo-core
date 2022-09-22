@@ -2,7 +2,6 @@ package telegram
 
 import (
 	"context"
-	"fmt"
 	"github.com/go-redis/redis/v9"
 	"hyneo/internal/auth"
 	"hyneo/internal/social/services"
@@ -57,7 +56,6 @@ func (h *handler) Message() {
 				return
 			}
 			cmd, userId := h.GetCommandByPayload(update.CallbackQuery.Data)
-			fmt.Println(cmd)
 			if cmd == nil {
 				return
 			}
@@ -67,7 +65,7 @@ func (h *handler) Message() {
 			}
 			userIdInt, err := strconv.ParseInt(userId, 10, 64)
 			if err != nil {
-				(*h.service).ClearKeyboard("Этот аккаунт не привязан к вам", update.Message.From.ID)
+				(*h.service).ClearKeyboard("Этот аккаунт не привязан к вам", update.CallbackQuery.Message.Chat.ID)
 				return
 			}
 			user := &auth.LinkUser{}
@@ -76,7 +74,7 @@ func (h *handler) Message() {
 			if err != nil {
 				user, err = (*h.service).GetUserID(userIdInt)
 				if err != nil {
-					(*h.service).ClearKeyboard("Этот аккаунт не привязан к вам", update.Message.From.ID)
+					(*h.service).ClearKeyboard("Этот аккаунт не привязан к вам", update.CallbackQuery.Message.Chat.ID)
 					return
 				} else {
 					ctx := context.TODO()
@@ -90,11 +88,15 @@ func (h *handler) Message() {
 						rdb.HSet(ctx, "link:"+userId, "user_id", user.UserID)
 						return nil
 					}); err != nil {
-						(*h.service).ClearKeyboard("Этот аккаунт не привязан к вам", update.Message.From.ID)
+						(*h.service).ClearKeyboard("Этот аккаунт не привязан к вам", update.CallbackQuery.Message.Chat.ID)
 						return
 					}
 					ser.Redis.Expire(ctx, "link:"+userId, time.Minute*5)
 				}
+			}
+			if user.ID == 0 {
+				(*h.service).ClearKeyboard("Этот аккаунт не привязан к вам", update.CallbackQuery.Message.Chat.ID)
+				return
 			}
 			if cmd != nil {
 				go cmd.Exec(update.CallbackQuery.Message, user, *h.service)

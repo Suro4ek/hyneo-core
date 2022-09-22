@@ -145,6 +145,9 @@ func (s *service) LeftTime(t time.Time) string {
 
 func (s *service) UpdateUser(user *auth.User) (*auth.User, error) {
 	user1 := &auth.User{}
+	if user.ID == 0 {
+		return nil, mc.UserNotFound
+	}
 	user.LastJoin = time.Now()
 	err := s.client.DB.Model(&auth.User{}).Where(&auth.User{ID: user.ID}).Updates(*user).First(user1).Error
 	if err != nil {

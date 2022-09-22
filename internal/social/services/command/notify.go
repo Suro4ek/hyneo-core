@@ -20,9 +20,9 @@ var Notify = &Command{
 		}
 		user.Notificated = !user.Notificated
 		if user.Notificated {
-			service.AccountKeyboard("Вы отписались от уведомлений", msg.ChatID, *user)
-		} else {
 			service.AccountKeyboard("Вы подписались на уведомления", msg.ChatID, *user)
+		} else {
+			service.AccountKeyboard("Вы отписались от уведомлений", msg.ChatID, *user)
 		}
 	},
 }

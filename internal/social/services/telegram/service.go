@@ -106,7 +106,7 @@ func (s *telegramService) GetMessage(messageObject interface{}) services.Message
 	messageTG := messageObject.(*tgbotapi.Message)
 	return services.Message{
 		Text:   messageTG.Text,
-		ChatID: messageTG.From.ID,
+		ChatID: messageTG.Chat.ID,
 	}
 }
 

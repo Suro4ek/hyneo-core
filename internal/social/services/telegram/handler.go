@@ -50,17 +50,17 @@ func (h *handler) Message() {
 			}
 		} else if update.CallbackQuery != nil {
 			//TODO заменить на текст
-			callback := tgbotapi.NewCallback(update.CallbackQuery.ID, update.CallbackQuery.Data)
-			_, err := h.bot.Request(callback)
-			if err != nil {
-				return
-			}
 			cmd, userId := h.GetCommandByPayload(update.CallbackQuery.Data)
 			if cmd == nil {
 				return
 			}
 			if cmd.WithoutUser {
 				go cmd.Exec(update.CallbackQuery.Message, &auth.LinkUser{}, *h.service)
+				callback := tgbotapi.NewCallback(update.CallbackQuery.ID, "Команда выполнена")
+				_, err := h.bot.Request(callback)
+				if err != nil {
+					return
+				}
 				return
 			}
 			userIdInt, err := strconv.ParseInt(userId, 10, 64)
@@ -100,6 +100,11 @@ func (h *handler) Message() {
 			}
 			if cmd != nil {
 				go cmd.Exec(update.CallbackQuery.Message, user, *h.service)
+				callback := tgbotapi.NewCallback(update.CallbackQuery.ID, "Команда выполнена")
+				_, err := h.bot.Request(callback)
+				if err != nil {
+					return
+				}
 			}
 		}
 	}

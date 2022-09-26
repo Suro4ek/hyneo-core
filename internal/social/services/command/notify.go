@@ -1,6 +1,8 @@
 package command
 
 import (
+	"context"
+	"fmt"
 	"hyneo/internal/auth"
 	"hyneo/internal/social/services"
 )
@@ -19,6 +21,7 @@ var Notify = &Command{
 			return
 		}
 		user.Notificated = !user.Notificated
+		ser.Redis.HSet(context.Background(), fmt.Sprintf("link:%d", user.UserID), "notificated", user.Banned)
 		if user.Notificated {
 			service.AccountKeyboard("Вы подписались на уведомления", msg.ChatID, *user)
 		} else {

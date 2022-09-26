@@ -22,6 +22,7 @@ var Ban = &Command{
 			return
 		}
 		user.Banned = !user.Banned
+		ser.Redis.HSet(context.Background(), fmt.Sprintf("link:%d", user.UserID), "banned", user.Banned)
 		if !user.Banned {
 			out, _ := json.Marshal(services.RedisSend{
 				Channel: "unban",

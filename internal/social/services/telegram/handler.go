@@ -55,12 +55,6 @@ func (h *handler) Message() {
 				return
 			}
 			if cmd.WithoutUser {
-				go cmd.Exec(update.CallbackQuery.Message, &auth.LinkUser{}, *h.service)
-				callback := tgbotapi.NewCallback(update.CallbackQuery.ID, "Команда выполнена")
-				_, err := h.bot.Request(callback)
-				if err != nil {
-					return
-				}
 				return
 			}
 			userIdInt, err := strconv.ParseInt(userId, 10, 64)
@@ -91,7 +85,7 @@ func (h *handler) Message() {
 						(*h.service).ClearKeyboard("Этот аккаунт не привязан к вам", update.CallbackQuery.Message.Chat.ID)
 						return
 					}
-					ser.Redis.Expire(ctx, "link:"+userId, time.Minute*5)
+					ser.Redis.Expire(ctx, "link:"+userId, time.Second*60)
 				}
 			}
 			if user.ID == 0 {
@@ -99,12 +93,12 @@ func (h *handler) Message() {
 				return
 			}
 			if cmd != nil {
-				go cmd.Exec(update.CallbackQuery.Message, user, *h.service)
 				callback := tgbotapi.NewCallback(update.CallbackQuery.ID, "Команда выполнена")
 				_, err := h.bot.Request(callback)
 				if err != nil {
 					return
 				}
+				go cmd.Exec(update.CallbackQuery.Message, user, *h.service)
 			}
 		}
 	}

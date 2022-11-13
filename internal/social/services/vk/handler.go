@@ -70,7 +70,7 @@ func (h *handler) Message() {
 						(*h.service).ClearKeyboard("Этот аккаунт не привязан к вам", int64(m.Message.FromID))
 						return
 					}
-					ser.Redis.Expire(ctx, "link:"+userId, time.Minute*5)
+					ser.Redis.Expire(ctx, "link:"+userId, time.Second*60)
 				}
 			}
 			go cmd.Exec(m, user, *h.service)

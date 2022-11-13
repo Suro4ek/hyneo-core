@@ -10,6 +10,7 @@ service Auth {
     rpc Login(LoginRequest) returns (User) {}
     rpc Register(RegisterRequest) returns (User) {}
     rpc ChangePassword(ChangePasswordRequest) returns (google.protobuf.Empty) {}
+    rpc ChangePasswordConsole(ChangePasswordConsoleRequest) returns (google.protobuf.Empty) {}
     rpc Logout(LogoutRequest) returns (google.protobuf.Empty) {}
     rpc LastLogin(LastLoginRequest) returns (LastLoginResponse) {}
     rpc GetUser(GetUserRequest) returns (GetUserResponse) {}
@@ -41,6 +42,11 @@ message ChangePasswordRequest {
     string username = 1;
     string old_password = 2;
     string new_password = 3;
+}
+
+message ChangePasswordConsoleRequest {
+    string username = 1;
+    string new_password = 2;
 }
 
 message ChangePasswordResponse {

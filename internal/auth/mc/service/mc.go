@@ -80,6 +80,22 @@ func (s *service) ChangePassword(username string, oldPassword string, newPasswor
 	return nil
 }
 
+func (s *service) ChangePasswordConsole(username string, newPassword string) error {
+	var user auth.User
+	err := s.client.DB.Model(&auth.User{}).Where(&auth.User{Username: username}).First(&user).Error
+	if err != nil {
+		s.log.Error(err)
+		return mc.UserNotFound
+	}
+	user.PasswordHash = s.service.CreatePassword(newPassword)
+	err = s.client.DB.Save(&user).Error
+	if err != nil {
+		s.log.Error(err)
+		return mc.Fault
+	}
+	return nil
+}
+
 func (s *service) Logout(username string) error {
 	var user auth.User
 	err := s.client.DB.Model(&auth.User{}).Where(&auth.User{Username: username}).First(&user).Error

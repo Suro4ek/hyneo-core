@@ -29,6 +29,15 @@ type Service interface {
 		так же хеширует пароль в sha256
 	*/
 	ChangePassword(username string, oldPassword string, newPassword string) error
+
+	/*
+		ChangePassword изменение пароля
+		вводные имя пользователя, старый пароль и новый пароль,
+		если пароль старый не правильный возращяет ошибку,
+		либо если пользователь не найден и если ошибка с базой данных,
+		так же хеширует пароль в sha256
+	*/
+	ChangePasswordConsole(username string, newPassword string) error
 	/*
 		Logout выхода пользователя
 		делает пользователя не авторизованным и сохроняет в бд

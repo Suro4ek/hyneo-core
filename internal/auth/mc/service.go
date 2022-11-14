@@ -6,6 +6,7 @@ import (
 )
 
 type Service interface {
+	GetLinkedUsers(userId int64) ([]auth.LinkUser, error)
 	/*
 			Login авторизации принимающие в себя
 			username, password и возращает пользователя,

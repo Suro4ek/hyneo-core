@@ -172,3 +172,13 @@ func (s *service) UpdateLastServer(userId int64, server string) error {
 	}
 	return nil
 }
+
+func (s *service) GetLinkedUsers(userId int64) ([]auth.LinkUser, error) {
+	var users []auth.LinkUser
+	err := s.client.DB.Model(&auth.LinkUser{}).Where(&auth.LinkUser{UserID: userId}).Find(&users).Error
+	if err != nil {
+		s.log.Error(err)
+		return nil, mc.Fault
+	}
+	return users, nil
+}

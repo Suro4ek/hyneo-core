@@ -86,6 +86,7 @@ message User {
     string registeredIp = 6;
     bool auth = 7;
     int32 locale_id = 8;
+    bool linked = 9;
 }
 
 message UnRegisterRequest {

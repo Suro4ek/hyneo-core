@@ -98,6 +98,11 @@ func (r *routerService) GetUser(_ context.Context, res *auth.GetUserRequest) (*a
 	if err != nil {
 		return nil, err
 	}
+	linked := false
+	users, err := r.service.GetLinkedUsers(int64(user.ID))
+	if err == nil && len(users) > 0 {
+		linked = true
+	}
 	return &auth.GetUserResponse{
 		User: &auth.User{
 			Id:           user.ID,
@@ -108,6 +113,7 @@ func (r *routerService) GetUser(_ context.Context, res *auth.GetUserRequest) (*a
 			LastServer:   user.LastServer,
 			Auth:         user.Authorized,
 			LocaleId:     0,
+			Linked:       linked,
 		},
 	}, nil
 }

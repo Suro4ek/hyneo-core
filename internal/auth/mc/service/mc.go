@@ -53,6 +53,10 @@ func (s *service) Register(user *auth.User) (*auth.User, error) {
 	user.Authorized = true
 	user.LastJoin = time.Now()
 	err := s.client.DB.Create(user).Error
+	countUsers, err := s.CountAccounts(user.RegisteredIP)
+	if countUsers >= 2 {
+		return nil, mc.AccountsLimit
+	}
 	if err != nil {
 		s.log.Error(err)
 		return nil, mc.Fault
@@ -197,4 +201,22 @@ func (s *service) GetLinkedUsers(userId int64) ([]auth.LinkUser, error) {
 		return nil, mc.Fault
 	}
 	return users, nil
+}
+
+func (s *service) CountAccounts(ip string) (int, error) {
+	var size = 0
+	var users []auth.User
+	err := s.client.DB.Model(&auth.User{}).Where(&auth.User{RegisteredIP: ip}).Find(&users).Error
+	if err != nil {
+		s.log.Error(err)
+		return 0, mc.Fault
+	}
+	size += len(users)
+	err = s.client.DB.Model(&auth.User{}).Where(&auth.User{IP: ip}).Find(&users).Error
+	if err != nil {
+		s.log.Error(err)
+		return 0, mc.Fault
+	}
+	size += len(users)
+	return size / 2, nil
 }

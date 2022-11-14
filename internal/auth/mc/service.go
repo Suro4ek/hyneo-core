@@ -6,6 +6,9 @@ import (
 )
 
 type Service interface {
+	/*
+	   Количетсво привязанных аккаунтов
+	*/
 	GetLinkedUsers(userId int64) ([]auth.LinkUser, error)
 	/*
 			Login авторизации принимающие в себя
@@ -78,4 +81,8 @@ type Service interface {
 		UpdateLastServer обновления последнего сервера
 	*/
 	UpdateLastServer(userId int64, server string) error
+	/*
+	   Количество аккаунтов
+	*/
+	CountAccounts(ip string) (int, error)
 }

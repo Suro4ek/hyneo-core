@@ -75,6 +75,14 @@ func (r *routerService) ChangePassword(_ context.Context, res *auth.ChangePasswo
 	return &emptypb.Empty{}, nil
 }
 
+func (r *routerService) ChangePasswordConsole(_ context.Context, res *auth.ChangePasswordConsoleRequest) (*emptypb.Empty, error) {
+	err := r.service.ChangePasswordConsole(res.Username, res.NewPassword)
+	if err != nil {
+		return nil, err
+	}
+	return &emptypb.Empty{}, nil
+}
+
 func (r *routerService) Logout(_ context.Context, res *auth.LogoutRequest) (*emptypb.Empty, error) {
 	err := r.service.Logout(res.Username)
 	if err != nil {

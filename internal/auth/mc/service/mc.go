@@ -54,7 +54,7 @@ func (s *service) Register(user *auth.User) (*auth.User, error) {
 	user.LastJoin = time.Now()
 	err := s.client.DB.Create(user).Error
 	countUsers, err := s.CountAccounts(user.RegisteredIP)
-	if countUsers >= 2 {
+	if countUsers >= 4 {
 		return nil, mc.AccountsLimit
 	}
 	if err != nil {

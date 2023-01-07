@@ -1,13 +1,13 @@
 ---
 
-- name: Выключение докер
+- name: Docker compose down
   command: "chdir={{docker-compose}} docker-compose down"
   loop: "{{ deploy_core }}"
 
-- name: Пуление
+- name: Docker image pull
   command: "chdir={{docker-compose}} docker-compose pull core"
   loop: "{{ deploy_core }}"
 
-- name: Деплой докер контейнера
+- name: Deploy Docker
   command: "chdir={{docker-compose}} docker-compose up -d"
   loop: "{{ deploy_core }}"

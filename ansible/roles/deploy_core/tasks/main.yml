@@ -1,5 +1,3 @@
----
-
 - name: Docker compose down
   command: "chdir={{docker-compose}} docker-compose down"
   loop: "{{ deploy_core }}"

@@ -1,0 +1,33 @@
+image: registry.hyneo.ru/hyneosoftware/ansible-ubuntu/main:latest
+
+before_script:
+  # Установка ssh ключей
+  - mkdir -p ~/.ssh
+  - echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+  - echo "$SSH_PUBLIC_KEY" | tr -d '\r' > ~/.ssh/id_rsa.pub
+  - chmod 700 ~/.ssh/id_rsa
+  - eval "$(ssh-agent -s)"
+  - ssh-add ~/.ssh/id_rsa
+
+build:
+  stage: build
+  services:
+    - docker:20.10.16-dind
+  script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_TOKEN $CI_REGISTRY
+    - docker build -t $CI_REGISTRY/hyneo/hyneo-core .
+    - docker push $CI_REGISTRY/hyneo/hyneo-core
+  only:
+    - main
+
+deploy:
+  stage: deploy
+  script:
+    # Ansible playbook
+    - cp -r ansible ansible-untracked
+    - cd ansible-untracked
+    - echo 'Ansible refuses to read from a world-writeable folder, hence' && chmod -v 700 $(pwd)
+    - ansible-playbook deploy-core.yml
+    - cd ..
+  only:
+    - master

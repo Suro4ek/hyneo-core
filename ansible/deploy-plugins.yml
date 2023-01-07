@@ -1,0 +1,6 @@
+---
+- hosts: all
+  remote_user: suro
+
+  roles:
+    - deploy_core

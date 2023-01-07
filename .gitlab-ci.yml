@@ -18,7 +18,7 @@ build:
     - docker build -t $CI_REGISTRY/hyneo/hyneo-core .
     - docker push $CI_REGISTRY/hyneo/hyneo-core
   only:
-    - main
+    - master
 
 deploy:
   stage: deploy

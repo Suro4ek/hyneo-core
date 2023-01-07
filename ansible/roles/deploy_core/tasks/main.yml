@@ -3,9 +3,9 @@
   loop: "{{ deploy_core }}"
 
 - name: Docker image pull
-  command: "chdir={{ item.docker-compose }} docker-compose pull core"
+  command: "chdir={{ item.docker_compose }} docker compose pull core"
   loop: "{{ deploy_core }}"
 
 - name: Deploy Docker
-  command: "chdir={{ item.docker-compose }} docker-compose up -d"
+  command: "chdir={{ item.docker_compose }} docker compose up -d"
   loop: "{{ deploy_core }}"

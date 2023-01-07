@@ -201,3 +201,5 @@ time="2022-09-22T21:29:09+09:00" level=info msg="Run Listen message Telegram" fu
 time="2022-09-22T21:29:09+09:00" level=info msg="Register commands" func="main.go:38" file="main.main()"
 time="2022-09-22T21:29:09+09:00" level=info msg="Run GRPC Server" func="main.go:40" file="main.main()"
 time="2022-09-22T21:29:28+09:00" level=error msg="record not found" func="service.go:71" file="hyneo/internal/social/services/telegram.(*telegramService).GetUser()"
+time="2023-01-07T23:34:32+09:00" level=info msg="read application config" func="config.go:63" file="hyneo/internal/config.GetConfig.func1()"
+time="2023-01-07T23:48:12+09:00" level=info msg="read application config" func="config.go:63" file="hyneo/internal/config.GetConfig.func1()"

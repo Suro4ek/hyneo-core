@@ -28,7 +28,7 @@ func runVKLongServer(Client *mysql.Client,
 	redis *redis.Client,
 	log *logging.Logger,
 	passwordService password.Service) services.Service {
-	token := cfg.Social.VK.Token // use os.Getenv("TOKEN")
+	token := cfg.Social.VK.Token
 	vk := api.NewVK(token)
 
 	service := vk3.NewVkService(Client, vk, code, redis, 0, log, passwordService)

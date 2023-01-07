@@ -37,7 +37,7 @@ func main() {
 	runServices := RunServices(cfg, codeService, client, redisClient, &logger, passwordService)
 	logger.Info("Register commands")
 	command.RegisterCommands()
-	logger.Info("Run GRPC Server")
+	logger.Info("Run GRPC Server to " + cfg.GRPCPort)
 	runGRPCServer(runServices, client, *cfg, &logger, passwordService)
 }
 

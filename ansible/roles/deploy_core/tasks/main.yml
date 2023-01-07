@@ -1,11 +1,11 @@
 - name: Docker compose down
-  command: "chdir={{docker-compose}} docker-compose down"
+  command: "chdir={{ item.docker_compose }} docker compose down"
   loop: "{{ deploy_core }}"
 
 - name: Docker image pull
-  command: "chdir={{docker-compose}} docker-compose pull core"
+  command: "chdir={{ item.docker-compose }} docker-compose pull core"
   loop: "{{ deploy_core }}"
 
 - name: Deploy Docker
-  command: "chdir={{docker-compose}} docker-compose up -d"
+  command: "chdir={{ item.docker-compose }} docker-compose up -d"
   loop: "{{ deploy_core }}"

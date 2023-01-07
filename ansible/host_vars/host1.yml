@@ -1,2 +1,2 @@
 deploy_core:
-  - docker-compose: ~/core/
+  - docker_compose: ~/core/

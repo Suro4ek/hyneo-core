@@ -4,15 +4,15 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"hyneo/internal/auth"
 	"hyneo/internal/social/services"
+	"hyneo/internal/user"
 )
 
 var Kick = &Command{
 	Name:        "kick",
 	Payload:     "kick",
 	WithoutUser: false,
-	Exec: func(message interface{}, user *auth.LinkUser, service services.Service) {
+	Exec: func(message interface{}, user *user.LinkUser, service services.Service) {
 		msg := service.GetMessage(message)
 		ser := service.GetService()
 		out, _ := json.Marshal(services.RedisSend{

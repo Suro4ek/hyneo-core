@@ -5,7 +5,6 @@ import (
 	"hyneo/internal/auth/password"
 	"hyneo/internal/user"
 	"hyneo/pkg/logging"
-	"hyneo/pkg/mysql"
 	"time"
 
 	"github.com/mergestat/timediff"
@@ -17,7 +16,7 @@ type service struct {
 	userService user.Service
 }
 
-func NewMCService(client *mysql.Client, pservice password.Service, log *logging.Logger, userService user.Service) mc.Service {
+func NewMCService(pservice password.Service, log *logging.Logger, userService user.Service) mc.Service {
 	return &service{
 		service:     pservice,
 		log:         log,

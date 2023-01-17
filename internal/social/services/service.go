@@ -41,6 +41,7 @@ type GetService struct {
 	Code      *code.Service
 	Redis     *redis.Client
 	Password  password.Service
+	User      user.Service
 }
 
 type RedisSend struct {

@@ -15,6 +15,8 @@ type Service interface {
 	GetLinkUserByID(id uint32) (*LinkUser, error)
 	GetLinkUserByUserID(id int64) (*LinkUser, error)
 
+	GetLinkUserByServiceIdAndServiceUserID(id int64, serviceID int) (*[]LinkUser, error)
+
 	UpdateLinkUser(id uint32, user LinkUser) (*LinkUser, error)
 
 	RemoveLinkUser(id uint32) error

@@ -1,15 +1,15 @@
 package command
 
 import (
-	"hyneo/internal/auth"
 	"hyneo/internal/social/services"
+	"hyneo/internal/user"
 )
 
 var Account = &Command{
 	Name:        "аккаунт",
 	Payload:     "user",
 	WithoutUser: false,
-	Exec: func(message interface{}, user *auth.LinkUser, service services.Service) {
+	Exec: func(message interface{}, user *user.LinkUser, service services.Service) {
 		msg := service.GetMessage(message)
 		users, err := service.GetUser(msg.ChatID)
 		if err != nil || user == nil {

@@ -2,15 +2,15 @@ package command
 
 import (
 	"fmt"
-	"hyneo/internal/auth"
 	"hyneo/internal/social/services"
+	"hyneo/internal/user"
 )
 
 var Restore = &Command{
 	Name:        "restore",
 	Payload:     "restore",
 	WithoutUser: false,
-	Exec: func(message interface{}, user *auth.LinkUser, service services.Service) {
+	Exec: func(message interface{}, user *user.LinkUser, service services.Service) {
 		msg := service.GetMessage(message)
 		ser := service.GetService()
 		usermc, err := service.GetMCUser(user.User.Username)

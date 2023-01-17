@@ -1,15 +1,15 @@
 package command
 
 import (
-	"hyneo/internal/auth"
 	"hyneo/internal/social/services"
+	"hyneo/internal/user"
 )
 
 var Status = &Command{
 	Name:        "status",
 	Payload:     "status",
 	WithoutUser: false,
-	Exec: func(message interface{}, userId *auth.LinkUser, service services.Service) {
+	Exec: func(message interface{}, userId *user.LinkUser, service services.Service) {
 		msg := service.GetMessage(message)
 		user, err := service.GetUserID(userId.UserID)
 		if err != nil {

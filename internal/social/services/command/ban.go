@@ -4,19 +4,19 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"hyneo/internal/auth"
 	"hyneo/internal/social/services"
+	"hyneo/internal/user"
 )
 
 var Ban = &Command{
 	Name:        "ban",
 	Payload:     "ban",
 	WithoutUser: false,
-	Exec: func(message interface{}, user *auth.LinkUser, service services.Service) {
+	Exec: func(message interface{}, user *user.LinkUser, service services.Service) {
 		msg := service.GetMessage(message)
 		ser := service.GetService()
-		err := ser.Client.DB.Model(&auth.LinkUser{}).Where("user_id = ?", user.UserID).
-			Update("banned", !user.Banned).Error
+		user.Banned = !user.Banned
+		_, err := ser.User.UpdateLinkUser(user.ID, *user)
 		if err != nil {
 			service.SendMessage("Не удалось выполнить команду", msg.ChatID)
 			return

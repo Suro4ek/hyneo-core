@@ -3,7 +3,7 @@ package services
 import (
 	"context"
 	"google.golang.org/protobuf/types/known/emptypb"
-	"hyneo/internal/auth"
+	"hyneo/internal/user"
 	"hyneo/pkg/mysql"
 	"hyneo/protos/service"
 )
@@ -23,34 +23,34 @@ func NewServiceRouter(client *mysql.Client, services []Service) service.ServiceS
 
 func (r *serviceRouter) NotifyServer(_ context.Context, res *service.NotifyServerRequest) (*emptypb.Empty, error) {
 	for _, s := range r.services {
-		user, err := s.GetUserID(int64(res.UserId))
+		u, err := s.GetUserID(int64(res.UserId))
 		if err != nil {
 			return nil, UserNotFound
 		}
-		if !user.Notificated {
+		if !u.Notificated {
 			return &emptypb.Empty{}, nil
 		}
-		if user.ServiceId != s.GetService().ServiceID {
+		if u.ServiceId != s.GetService().ServiceID {
 			continue
 		}
-		s.SendMessage("Вы подключились к серверу "+res.GetServer(), user.ServiceUserID)
+		s.SendMessage("Вы подключились к серверу "+res.GetServer(), u.ServiceUserID)
 	}
 	return &emptypb.Empty{}, nil
 }
 
 func (r *serviceRouter) Join(_ context.Context, res *service.JoinRequest) (*emptypb.Empty, error) {
 	for _, s := range r.services {
-		user, err := s.GetUserID(int64(res.UserId))
+		u, err := s.GetUserID(int64(res.UserId))
 		if err != nil {
 			return nil, UserNotFound
 		}
-		if !user.Notificated {
+		if !u.Notificated {
 			return &emptypb.Empty{}, nil
 		}
-		if user.ServiceId != s.GetService().ServiceID {
+		if u.ServiceId != s.GetService().ServiceID {
 			continue
 		}
-		s.SendMessage("Вы подключились к серверу с ip: "+res.GetIp(), user.ServiceUserID)
+		s.SendMessage("Вы подключились к серверу с ip: "+res.GetIp(), u.ServiceUserID)
 	}
 	return &emptypb.Empty{}, nil
 }
@@ -58,7 +58,7 @@ func (r *serviceRouter) Join(_ context.Context, res *service.JoinRequest) (*empt
 func (r *serviceRouter) CheckCode(_ context.Context, res *service.CheckCodeRequest) (*emptypb.Empty, error) {
 	for _, s := range r.services {
 		ser := s.GetService()
-		user, err := s.GetMCUser(res.GetUsername())
+		u, err := s.GetMCUser(res.GetUsername())
 		if err != nil {
 			return nil, UserNotFound
 		}
@@ -72,9 +72,9 @@ func (r *serviceRouter) CheckCode(_ context.Context, res *service.CheckCodeReque
 		if !ser.Code.CompareCode(res.GetUsername(), res.GetCode()) {
 			return nil, InvalidCode
 		}
-		vkUser := &auth.LinkUser{
+		vkUser := &user.LinkUser{
 			ServiceUserID: VkID.UserID,
-			User:          *user,
+			User:          *u,
 			ServiceId:     ser.ServiceID,
 			Notificated:   true,
 			Banned:        false,
@@ -85,7 +85,7 @@ func (r *serviceRouter) CheckCode(_ context.Context, res *service.CheckCodeReque
 			return nil, err
 		}
 		ser.Code.RemoveCode(res.GetUsername())
-		s.SendKeyboard("Вы успешно привязали аккаунт "+user.Username, VkID.UserID)
+		s.SendKeyboard("Вы успешно привязали аккаунт "+u.Username, VkID.UserID)
 	}
 	return &emptypb.Empty{}, nil
 }

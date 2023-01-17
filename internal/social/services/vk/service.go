@@ -7,39 +7,40 @@ import (
 	"github.com/SevereCloud/vksdk/v2/events"
 	"github.com/SevereCloud/vksdk/v2/object"
 	"github.com/go-redis/redis/v9"
-	"hyneo/internal/auth"
 	"hyneo/internal/auth/code"
 	"hyneo/internal/auth/password"
 	"hyneo/internal/social/services"
+	"hyneo/internal/user"
 	"hyneo/pkg/logging"
-	"hyneo/pkg/mysql"
 )
 
 type Service struct {
-	Client          *mysql.Client
 	Vk              *api.VK
 	Code            *code.Service
 	Redis           *redis.Client
 	ServiceID       int
 	log             *logging.Logger
 	PasswordService password.Service
+	userService     user.Service
 }
 
-func NewVkService(Client *mysql.Client,
+func NewVkService(
 	VK *api.VK,
 	Code *code.Service,
 	redis *redis.Client,
 	ServiceID int,
 	log *logging.Logger,
-	passwordService password.Service) services.Service {
+	passwordService password.Service,
+	userService user.Service,
+) services.Service {
 	return &Service{
-		Client:          Client,
 		Vk:              VK,
 		Code:            Code,
 		ServiceID:       ServiceID,
 		Redis:           redis,
 		log:             log,
 		PasswordService: passwordService,
+		userService:     userService,
 	}
 }
 
@@ -54,46 +55,37 @@ func (s *Service) GetMessage(messageObject interface{}) services.Message {
 func (s *Service) GetService() *services.GetService {
 	return &services.GetService{
 		ServiceID: s.ServiceID,
-		Client:    s.Client,
 		Code:      s.Code,
 		Redis:     s.Redis,
 		Password:  s.PasswordService,
 	}
 }
 
-func (s *Service) GetUser(ID int64) (user1 []auth.LinkUser, err error) {
-	var users []auth.LinkUser
-	err = s.Client.DB.Model(&auth.LinkUser{}).Where(&auth.LinkUser{
-		ServiceId:     s.ServiceID,
-		ServiceUserID: ID,
-	}).First(&users).Error
+func (s *Service) GetUser(ID int64) (user1 []user.LinkUser, err error) {
+	users, err := s.userService.GetLinkUserByServiceIdAndServiceUserID(ID, s.ServiceID)
 	if err != nil {
 		s.log.Error(err)
 		return nil, err
 	}
-	return users, nil
+	return *users, nil
 }
 
-func (s *Service) GetUserID(userId int64) (user1 *auth.LinkUser, err error) {
-	var user auth.LinkUser
-	err = s.Client.DB.Model(&auth.LinkUser{}).Joins("User").Where(auth.LinkUser{
-		UserID: userId,
-	}).Find(&user).Error
+func (s *Service) GetUserID(userId int64) (user1 *user.LinkUser, err error) {
+	u, err := s.userService.GetLinkUserByUserID(userId)
 	if err != nil {
 		s.log.Error(err)
 		return nil, err
 	}
-	return &user, nil
+	return u, nil
 }
 
-func (s *Service) GetMCUser(username string) (*auth.User, error) {
-	var user auth.User
-	err := s.Client.DB.Model(&auth.User{}).Where("username = ?", username).First(&user).Error
+func (s *Service) GetMCUser(username string) (*user.User, error) {
+	u, err := s.userService.GetUserByName(username)
 	if err != nil {
 		s.log.Error(err)
 		return nil, err
 	}
-	return &user, nil
+	return u, nil
 }
 
 func (s *Service) SendMessage(message string, chadID int64) {
@@ -123,7 +115,7 @@ func (s *Service) ClearKeyboard(message string, chadID int64) {
 	}
 }
 
-func (s *Service) SoloUserKeyBoard(user auth.LinkUser) *object.MessagesKeyboard {
+func (s *Service) SoloUserKeyBoard(user user.LinkUser) *object.MessagesKeyboard {
 	buttons := object.NewMessagesKeyboard(false)
 	buttons.AddRow()
 	buttons.AddTextButton("Информация о аккаунте", fmt.Sprintf("status %d", user.User.ID), "primary")
@@ -160,7 +152,7 @@ func (s *Service) SoloUserKeyBoard(user auth.LinkUser) *object.MessagesKeyboard 
 	return buttons
 }
 
-func (s *Service) AccountKeyboard(message string, chatID int64, user auth.LinkUser) {
+func (s *Service) AccountKeyboard(message string, chatID int64, user user.LinkUser) {
 	m := params.NewMessagesSendBuilder()
 	soloUserKeyBoard := s.SoloUserKeyBoard(user)
 	soloUserKeyBoard.AddTextButton("Назад", "accounts", "secondary")
@@ -176,23 +168,19 @@ func (s *Service) AccountKeyboard(message string, chatID int64, user auth.LinkUs
 
 func (s *Service) SendKeyboard(message string, ChatID int64) {
 	m := params.NewMessagesSendBuilder()
-	var users []auth.LinkUser
-	err := s.Client.DB.Model(&auth.LinkUser{}).Joins("User").Where(auth.LinkUser{
-		ServiceId:     s.ServiceID,
-		ServiceUserID: ChatID,
-	}).Find(&users).Error
+	users, err := s.userService.GetLinkUserByServiceIdAndServiceUserID(ChatID, s.ServiceID)
 	if err != nil {
 		s.log.Error(err)
 		return
 	}
 	messagesKeyboard := object.NewMessagesKeyboard(false)
-	if len(users) == 1 {
-		user := users[0]
-		messagesKeyboard = s.SoloUserKeyBoard(user)
+	if len(*users) == 1 {
+		u := (*users)[0]
+		messagesKeyboard = s.SoloUserKeyBoard(u)
 	} else {
-		for _, user := range users {
+		for _, u := range *users {
 			messagesKeyboard.AddRow()
-			messagesKeyboard.AddTextButton(user.User.Username, fmt.Sprintf("user %d", user.UserID), "primary")
+			messagesKeyboard.AddTextButton(u.User.Username, fmt.Sprintf("user %d", u.UserID), "primary")
 		}
 	}
 	m.Message(message)

@@ -1,8 +1,8 @@
 package command
 
 import (
-	"hyneo/internal/auth"
 	"hyneo/internal/social/services"
+	"hyneo/internal/user"
 )
 
 var UnBind = &Command{
@@ -10,7 +10,7 @@ var UnBind = &Command{
 	Payload:     "unlink",
 	WithoutUser: false,
 	Alias:       []string{"unlink"},
-	Exec: func(message interface{}, user *auth.LinkUser, service services.Service) {
+	Exec: func(message interface{}, user *user.LinkUser, service services.Service) {
 		msg := service.GetMessage(message)
 		s := service.GetService()
 		err := s.Client.DB.Delete(&user).Error

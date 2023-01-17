@@ -3,19 +3,19 @@ package command
 import (
 	"context"
 	"fmt"
-	"hyneo/internal/auth"
 	"hyneo/internal/social/services"
+	"hyneo/internal/user"
 )
 
 var Notify = &Command{
 	Name:        "notify",
 	Payload:     "notify",
 	WithoutUser: false,
-	Exec: func(message interface{}, user *auth.LinkUser, service services.Service) {
+	Exec: func(message interface{}, user *user.LinkUser, service services.Service) {
 		msg := service.GetMessage(message)
 		ser := service.GetService()
-		err := ser.Client.DB.Model(&auth.LinkUser{}).Where("user_id = ?", user.UserID).
-			Update("notificated", !user.Notificated).Error
+		user.Notificated = !user.Notificated
+		_, err := ser.User.UpdateLinkUser(user.ID, *user)
 		if err != nil {
 			service.SendMessage("Не удалось выполнить команду", msg.ChatID)
 			return

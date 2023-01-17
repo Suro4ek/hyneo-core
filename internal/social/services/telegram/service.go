@@ -9,34 +9,35 @@ import (
 	"hyneo/internal/social/services"
 	"hyneo/internal/user"
 	"hyneo/pkg/logging"
-	"hyneo/pkg/mysql"
 )
 
 type telegramService struct {
 	bot             *tgbotapi.BotAPI
-	Client          *mysql.Client
 	Code            *code.Service
 	Redis           *redis.Client
 	ServiceID       int
 	log             *logging.Logger
 	PasswordService password.Service
+	userService     user.Service
 }
 
-func NewTelegramService(client *mysql.Client,
+func NewTelegramService(
 	bot *tgbotapi.BotAPI,
 	Code *code.Service,
 	redis *redis.Client,
 	ServiceID int,
 	log *logging.Logger,
-	passwordService password.Service) services.Service {
+	passwordService password.Service,
+	userService user.Service,
+) services.Service {
 	return &telegramService{
-		Client:          client,
 		bot:             bot,
 		Code:            Code,
 		ServiceID:       ServiceID,
 		Redis:           redis,
 		log:             log,
 		PasswordService: passwordService,
+		userService:     userService,
 	}
 }
 
@@ -54,7 +55,6 @@ func (s *telegramService) SendMessage(message string, chatID int64) {
 func (s *telegramService) GetService() *services.GetService {
 	return &services.GetService{
 		ServiceID: s.ServiceID,
-		Client:    s.Client,
 		Code:      s.Code,
 		Redis:     s.Redis,
 		Password:  s.PasswordService,
@@ -62,44 +62,36 @@ func (s *telegramService) GetService() *services.GetService {
 }
 
 func (s *telegramService) GetUser(ID int64) (user1 []user.LinkUser, err error) {
-	var users []user.LinkUser
-	err = s.Client.DB.Model(&user.LinkUser{}).Where(&user.LinkUser{
-		ServiceId:     s.ServiceID,
-		ServiceUserID: ID,
-	}).First(&users).Error
+	users, err := s.userService.GetLinkUserByServiceIdAndServiceUserID(ID, s.ServiceID)
 	if err != nil {
 		s.log.Error(err)
 		return nil, err
 	}
-	return users, nil
+	return *users, nil
 }
 
 /*
 Получение *user.User по никнейму в игре
 */
 func (s *telegramService) GetMCUser(username string) (*user.User, error) {
-	var user user.User
-	err := s.Client.DB.Model(&user.User{}).Where("username = ?", username).First(&user).Error
+	u, err := s.userService.GetUserByName(username)
 	if err != nil {
 		s.log.Error(err)
 		return nil, err
 	}
-	return &user, nil
+	return u, nil
 }
 
 /*
 Получение
 */
 func (s *telegramService) GetUserID(userId int64) (user1 *user.LinkUser, err error) {
-	var user user.LinkUser
-	err = s.Client.DB.Model(&user.LinkUser{}).Joins("User").Where(user.LinkUser{
-		UserID: userId,
-	}).Find(&user).Error
+	u, err := s.userService.GetLinkUserByUserID(userId)
 	if err != nil {
 		s.log.Error(err)
 		return nil, err
 	}
-	return &user, nil
+	return u, nil
 }
 
 func (s *telegramService) GetMessage(messageObject interface{}) services.Message {
@@ -160,23 +152,20 @@ func (s *telegramService) SoloUserKeyBoard(user user.LinkUser) tgbotapi.InlineKe
 }
 
 func (s *telegramService) SendKeyboard(message string, chatId int64) {
-	var users []user.LinkUser
-	err := s.Client.DB.Model(&user.LinkUser{}).Joins("User").Where(user.LinkUser{
-		ServiceId:     s.ServiceID,
-		ServiceUserID: chatId}).Find(&users).Error
+	users, err := s.userService.GetLinkUserByServiceIdAndServiceUserID(chatId, s.ServiceID)
 	if err != nil {
 		s.log.Error(err)
 		return
 	}
 	var numericKeyboard tgbotapi.InlineKeyboardMarkup
-	if len(users) == 1 {
-		user := users[0]
-		numericKeyboard = s.SoloUserKeyBoard(user)
+	if len(*users) == 1 {
+		u := (*users)[0]
+		numericKeyboard = s.SoloUserKeyBoard(u)
 	} else {
 		numericKeyboard = tgbotapi.NewInlineKeyboardMarkup()
-		for _, user := range users {
+		for _, u := range *users {
 			numericKeyboard.InlineKeyboard = append(numericKeyboard.InlineKeyboard, tgbotapi.NewInlineKeyboardRow(
-				tgbotapi.NewInlineKeyboardButtonData(user.User.Username, fmt.Sprintf("user %d", user.UserID)),
+				tgbotapi.NewInlineKeyboardButtonData(u.User.Username, fmt.Sprintf("user %d", u.UserID)),
 			))
 		}
 	}

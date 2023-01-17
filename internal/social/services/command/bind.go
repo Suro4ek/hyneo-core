@@ -3,8 +3,8 @@ package command
 import (
 	"errors"
 	"gorm.io/gorm"
-	"hyneo/internal/auth"
 	"hyneo/internal/social/services"
+	"hyneo/internal/user"
 	"strings"
 )
 
@@ -13,7 +13,7 @@ var Bind = &Command{
 	Payload:     "-1",
 	WithoutUser: true,
 	Alias:       []string{"link"},
-	Exec: func(message interface{}, user1 *auth.LinkUser, service services.Service) {
+	Exec: func(message interface{}, user1 *user.LinkUser, service services.Service) {
 		msg := service.GetMessage(message)
 		length := strings.Fields(msg.Text)
 		if len(length) != 2 {

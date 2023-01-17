@@ -3,9 +3,9 @@ package vk
 import (
 	"context"
 	"github.com/go-redis/redis/v9"
-	"hyneo/internal/auth"
 	"hyneo/internal/social/services"
 	command2 "hyneo/internal/social/services/command"
+	"hyneo/internal/user"
 	"log"
 	"strconv"
 	"strings"
@@ -39,7 +39,7 @@ func (h *handler) Message() {
 		cmd, userId := h.GetCommandByPayload(strings.ReplaceAll(m.Message.Payload, "\"", ""))
 		if cmd != nil {
 			if cmd.WithoutUser {
-				go cmd.Exec(m, &auth.LinkUser{}, *h.service)
+				go cmd.Exec(m, &user.LinkUser{}, *h.service)
 				return
 			}
 			userIdInt, err := strconv.ParseInt(userId, 10, 64)
@@ -47,24 +47,24 @@ func (h *handler) Message() {
 				(*h.service).ClearKeyboard("Этот аккаунт не привязан к вам", int64(m.Message.FromID))
 				return
 			}
-			user := &auth.LinkUser{}
+			u := &user.LinkUser{}
 			ser := (*h.service).GetService()
-			err = ser.Redis.HGetAll(context.Background(), "link:"+userId).Scan(&user)
+			err = ser.Redis.HGetAll(context.Background(), "link:"+userId).Scan(&u)
 			if err != nil {
-				user, err = (*h.service).GetUserID(userIdInt)
+				u, err = (*h.service).GetUserID(userIdInt)
 				if err != nil {
 					(*h.service).ClearKeyboard("Этот аккаунт не привязан к вам", int64(m.Message.FromID))
 					return
 				} else {
 					ctx := context.TODO()
 					if _, err := ser.Redis.Pipelined(ctx, func(rdb redis.Pipeliner) error {
-						rdb.HSet(ctx, "link:"+userId, "id", user.ID)
-						rdb.HSet(ctx, "link:"+userId, "service_id", user.ServiceId)
-						rdb.HSet(ctx, "link:"+userId, "service_user_id", user.ServiceUserID)
-						rdb.HSet(ctx, "link:"+userId, "notificated", user.Notificated)
-						rdb.HSet(ctx, "link:"+userId, "banned", user.Banned)
-						rdb.HSet(ctx, "link:"+userId, "double_auth", user.DoubleAuth)
-						rdb.HSet(ctx, "link:"+userId, "user_id", user.UserID)
+						rdb.HSet(ctx, "link:"+userId, "id", u.ID)
+						rdb.HSet(ctx, "link:"+userId, "service_id", u.ServiceId)
+						rdb.HSet(ctx, "link:"+userId, "service_user_id", u.ServiceUserID)
+						rdb.HSet(ctx, "link:"+userId, "notificated", u.Notificated)
+						rdb.HSet(ctx, "link:"+userId, "banned", u.Banned)
+						rdb.HSet(ctx, "link:"+userId, "double_auth", u.DoubleAuth)
+						rdb.HSet(ctx, "link:"+userId, "user_id", u.UserID)
 						return nil
 					}); err != nil {
 						(*h.service).ClearKeyboard("Этот аккаунт не привязан к вам", int64(m.Message.FromID))
@@ -73,11 +73,11 @@ func (h *handler) Message() {
 					ser.Redis.Expire(ctx, "link:"+userId, time.Second*60)
 				}
 			}
-			go cmd.Exec(m, user, *h.service)
+			go cmd.Exec(m, u, *h.service)
 		} else {
 			if cmd, ok := command2.GetCommands()[strings.ToLower(marray[0])]; ok {
 				if cmd.Payload == "-1" {
-					go cmd.Exec(m, &auth.LinkUser{}, *h.service)
+					go cmd.Exec(m, &user.LinkUser{}, *h.service)
 				}
 			}
 		}

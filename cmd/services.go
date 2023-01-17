@@ -11,27 +11,36 @@ import (
 	"hyneo/internal/social/services"
 	telegram2 "hyneo/internal/social/services/telegram"
 	vk3 "hyneo/internal/social/services/vk"
+	"hyneo/internal/user"
 	"hyneo/pkg/logging"
-	"hyneo/pkg/mysql"
 )
 
-func RunServices(cfg *config.Config, service *code.Service, client *mysql.Client, redis *redis.Client, log *logging.Logger, passwordService password.Service) []services.Service {
+func RunServices(
+	cfg *config.Config,
+	service *code.Service,
+	redis *redis.Client,
+	log *logging.Logger,
+	passwordService password.Service,
+	userService user.Service,
+) []services.Service {
 	servicess := make([]services.Service, 0)
-	servicess = append(servicess, runVKLongServer(client, cfg, service, redis, log, passwordService))
-	servicess = append(servicess, runTGServer(client, cfg, service, redis, log, passwordService))
+	servicess = append(servicess, runVKLongServer(cfg, service, redis, log, passwordService, userService))
+	servicess = append(servicess, runTGServer(cfg, service, redis, log, passwordService, userService))
 	return servicess
 }
 
-func runVKLongServer(Client *mysql.Client,
+func runVKLongServer(
 	cfg *config.Config,
 	code *code.Service,
 	redis *redis.Client,
 	log *logging.Logger,
-	passwordService password.Service) services.Service {
+	passwordService password.Service,
+	userService user.Service,
+) services.Service {
 	token := cfg.Social.VK.Token
 	vk := api.NewVK(token)
 
-	service := vk3.NewVkService(Client, vk, code, redis, 0, log, passwordService)
+	service := vk3.NewVkService(vk, code, redis, 0, log, passwordService, userService)
 	// get information about the group
 	group, err := vk.GroupsGetByID(api.Params{
 		"group_id": cfg.Social.VK.GroupID,
@@ -52,12 +61,14 @@ func runVKLongServer(Client *mysql.Client,
 	return service
 }
 
-func runTGServer(Client *mysql.Client,
+func runTGServer(
 	cfg *config.Config,
 	code *code.Service,
 	redis *redis.Client,
 	log *logging.Logger,
-	passwordService password.Service) services.Service {
+	passwordService password.Service,
+	userService user.Service,
+) services.Service {
 	bot, err := tgbotapi.NewBotAPI(cfg.Social.Telegram.Token)
 	if err != nil {
 		log.Panic(err)
@@ -67,7 +78,7 @@ func runTGServer(Client *mysql.Client,
 
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 
-	service := telegram2.NewTelegramService(Client, bot, code, redis, 1, log, passwordService)
+	service := telegram2.NewTelegramService(bot, code, redis, 1, log, passwordService, userService)
 	log.Info("Run Listen message Telegram")
 	go func() {
 		handler := telegram2.NewTelegramHandler(bot, &service)

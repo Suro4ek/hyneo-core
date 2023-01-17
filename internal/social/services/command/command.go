@@ -1,8 +1,8 @@
 package command
 
 import (
-	"hyneo/internal/auth"
 	"hyneo/internal/social/services"
+	"hyneo/internal/user"
 )
 
 type Command struct {
@@ -10,5 +10,5 @@ type Command struct {
 	Payload     string   `json:"payload"`
 	WithoutUser bool     `json:"without_user"`
 	Alias       []string `json:"alias"`
-	Exec        func(message interface{}, userId *auth.LinkUser, service services.Service)
+	Exec        func(message interface{}, userId *user.LinkUser, service services.Service)
 }

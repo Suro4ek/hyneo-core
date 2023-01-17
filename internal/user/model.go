@@ -14,6 +14,15 @@ type User struct {
 	Authorized   bool      `json:"authorized"`
 }
 
+//TODO redis cache
+type IgnoreUser struct {
+	ID         uint32 `json:"id"`
+	UserID     uint32 `json:"user_id"`
+	IgnoreID   uint32 `json:"ignore_id"`
+	User       User   `gorm:"foreignKey:user_id"`
+	IgnoreUser User   `gorm:"foreignKey:ignore_id"`
+}
+
 // TODO подумать насчет DoubleAuth оставить его или нет
 type LinkUser struct {
 	ID            uint32 `json:"id" redis:"id"`

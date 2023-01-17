@@ -1,15 +1,15 @@
 package mc
 
 import (
-	"hyneo/internal/auth"
+	"hyneo/internal/user"
 	"time"
 )
 
 type Service interface {
 	/*
-	   Количетсво привязанных аккаунтов
+	  Количетсво привязанных аккаунтов
 	*/
-	GetLinkedUsers(userId int64) ([]auth.LinkUser, error)
+	GetLinkedUsers(userId int64) ([]user.LinkUser, error)
 	/*
 			Login авторизации принимающие в себя
 			username, password и возращает пользователя,
@@ -17,14 +17,14 @@ type Service interface {
 		    либо ошибки UserNotFound, IncorrectPassword, Fault - ошибка с бд,
 		    создает сессию на 24 часа и делает пользователя авторизированным
 	*/
-	Login(username string, password string) (*auth.User, error)
+	Login(username string, password string) (*user.User, error)
 	/*
 		   	Register регистрации принимает в себя пользователя и возращяет пользователя
 			берет passwordHash и создает хешированный пароль в sha256 с salt,
 			создает сессию на 24 часа и делает пользователя авторизированным
 			и возращяет пользователя
 	*/
-	Register(*auth.User) (*auth.User, error)
+	Register(*user.User) (*user.User, error)
 	/*
 		ChangePassword изменение пароля
 		вводные имя пользователя, старый пароль и новый пароль,
@@ -59,7 +59,7 @@ type Service interface {
 		UserNotFound или ошибку с бд Fault,
 		так же проверяет сессию игрока
 	*/
-	GetUser(id string) (*auth.User, error)
+	GetUser(id string) (*user.User, error)
 	/*
 	   	UnRegister удаление пользователя
 	   	Удаляет пользователя по имя пользователя
@@ -76,13 +76,9 @@ type Service interface {
 		Вводные данные пользователь
 		ищет пользователя в бд и обновляет его данные в бд
 	*/
-	UpdateUser(user *auth.User) (*auth.User, error)
+	UpdateUser(user *user.User) (*user.User, error)
 	/*
 		UpdateLastServer обновления последнего сервера
 	*/
 	UpdateLastServer(userId int64, server string) error
-	/*
-	   Количество аккаунтов
-	*/
-	CountAccounts(ip string) (int, error)
 }

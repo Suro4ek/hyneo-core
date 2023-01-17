@@ -2,9 +2,9 @@ package services
 
 import (
 	"github.com/go-redis/redis/v9"
-	"hyneo/internal/auth"
 	"hyneo/internal/auth/code"
 	"hyneo/internal/auth/password"
+	"hyneo/internal/user"
 	"hyneo/pkg/mysql"
 )
 
@@ -14,18 +14,18 @@ type Service interface {
 	//SendKeyboard Отправка клавиатуры может быть и с несколькими пользователями
 	SendKeyboard(message string, chatID int64)
 	//AccountKeyboard Отправка клавиатуры конкретного пользователя
-	AccountKeyboard(message string, chatID int64, user auth.LinkUser)
+	AccountKeyboard(message string, chatID int64, user user.LinkUser)
 	//ClearKeyboard Очистка клавиатуры
 	ClearKeyboard(message string, chatID int64)
 
 	// GetUser Получение пользователей []auth.LinkUser по ID пользователя сети
-	GetUser(ID int64) (user []auth.LinkUser, err error)
+	GetUser(ID int64) (user []user.LinkUser, err error)
 	//GetMessage получить Message по messageObject
 	GetMessage(messageObject interface{}) (message Message)
 	//GetMCUser получить *auth.User по никнейму из игры
-	GetMCUser(username string) (*auth.User, error)
+	GetMCUser(username string) (*user.User, error)
 	//GetUserID получить *auth.LinkUser по id строки в бд
-	GetUserID(userId int64) (user *auth.LinkUser, err error)
+	GetUserID(userId int64) (user *user.LinkUser, err error)
 	//GetService получить *GetService
 	GetService() (service *GetService)
 }

@@ -1,9 +1,9 @@
 package service
 
 import (
-	"hyneo/internal/auth"
 	"hyneo/internal/auth/mc"
 	"hyneo/internal/auth/password"
+	"hyneo/internal/user"
 	"hyneo/pkg/logging"
 	"hyneo/pkg/mysql"
 	"time"
@@ -12,48 +12,47 @@ import (
 )
 
 type service struct {
-	client  *mysql.Client
-	service password.Service
-	log     *logging.Logger
+	service     password.Service
+	log         *logging.Logger
+	userService user.Service
 }
 
-func NewMCService(client *mysql.Client, pservice password.Service, log *logging.Logger) mc.Service {
+func NewMCService(client *mysql.Client, pservice password.Service, log *logging.Logger, userService user.Service) mc.Service {
 	return &service{
-		client:  client,
-		service: pservice,
-		log:     log,
+		service:     pservice,
+		log:         log,
+		userService: userService,
 	}
 }
 
-func (s *service) Login(username string, password string) (*auth.User, error) {
-	var user auth.User
-	err := s.client.DB.Model(&auth.User{}).Where(&auth.User{Username: username}).First(&user).Error
+func (s *service) Login(username string, password string) (*user.User, error) {
+	userByName, err := s.userService.GetUserByName(username)
 	if err != nil {
 		s.log.Error(err)
 		return nil, mc.UserNotFound
 	}
-	if !s.service.ComparePassword(user.PasswordHash, password) {
+	if !s.service.ComparePassword(userByName.PasswordHash, password) {
 		s.log.Error(err)
 		return nil, mc.IncorrectPassword
 	}
-	user.Authorized = true
-	user.LastJoin = time.Now()
-	user.Session = time.Now().Add(time.Hour * 24)
-	err = s.client.DB.Save(&user).Error
+	userByName.Authorized = true
+	userByName.LastJoin = time.Now()
+	userByName.Session = time.Now().Add(time.Hour * 24)
+	_, err = s.userService.UpdateUser(userByName.ID, *userByName)
 	if err != nil {
 		s.log.Error(err)
 		return nil, mc.Fault
 	}
-	return &user, nil
+	return userByName, nil
 }
 
-func (s *service) Register(user *auth.User) (*auth.User, error) {
-	user.PasswordHash = s.service.CreatePassword(user.PasswordHash)
-	user.Session = time.Now().Add(time.Hour * 24)
-	user.Authorized = true
-	user.LastJoin = time.Now()
-	err := s.client.DB.Create(user).Error
-	countUsers, err := s.CountAccounts(user.RegisteredIP)
+func (s *service) Register(createUser *user.User) (*user.User, error) {
+	createUser.PasswordHash = s.service.CreatePassword(createUser.PasswordHash)
+	createUser.Session = time.Now().Add(time.Hour * 24)
+	createUser.Authorized = true
+	createUser.LastJoin = time.Now()
+	_, err := s.userService.CreateUser(*createUser)
+	countUsers, err := s.userService.CountAccounts(createUser.RegisteredIP)
 	if countUsers >= 4 {
 		return nil, mc.AccountsLimit
 	}
@@ -61,22 +60,21 @@ func (s *service) Register(user *auth.User) (*auth.User, error) {
 		s.log.Error(err)
 		return nil, mc.Fault
 	}
-	return user, nil
+	return createUser, nil
 }
 
 func (s *service) ChangePassword(username string, oldPassword string, newPassword string) error {
-	var user auth.User
-	err := s.client.DB.Model(&auth.User{}).Where(&auth.User{Username: username}).First(&user).Error
+	userByName, err := s.userService.GetUserByName(username)
 	if err != nil {
 		s.log.Error(err)
 		return mc.UserNotFound
 	}
-	if !s.service.ComparePassword(user.PasswordHash, oldPassword) {
+	if !s.service.ComparePassword(userByName.PasswordHash, oldPassword) {
 		s.log.Error(err)
 		return mc.IncorrectPassword
 	}
-	user.PasswordHash = s.service.CreatePassword(newPassword)
-	err = s.client.DB.Save(&user).Error
+	userByName.PasswordHash = s.service.CreatePassword(newPassword)
+	_, err = s.userService.UpdateUser(userByName.ID, *userByName)
 	if err != nil {
 		s.log.Error(err)
 		return mc.Fault
@@ -85,14 +83,13 @@ func (s *service) ChangePassword(username string, oldPassword string, newPasswor
 }
 
 func (s *service) ChangePasswordConsole(username string, newPassword string) error {
-	var user auth.User
-	err := s.client.DB.Model(&auth.User{}).Where(&auth.User{Username: username}).First(&user).Error
+	userByName, err := s.userService.GetUserByName(username)
 	if err != nil {
 		s.log.Error(err)
 		return mc.UserNotFound
 	}
-	user.PasswordHash = s.service.CreatePassword(newPassword)
-	err = s.client.DB.Save(&user).Error
+	userByName.PasswordHash = s.service.CreatePassword(newPassword)
+	_, err = s.userService.UpdateUser(userByName.ID, *userByName)
 	if err != nil {
 		s.log.Error(err)
 		return mc.Fault
@@ -101,14 +98,13 @@ func (s *service) ChangePasswordConsole(username string, newPassword string) err
 }
 
 func (s *service) Logout(username string) error {
-	var user auth.User
-	err := s.client.DB.Model(&auth.User{}).Where(&auth.User{Username: username}).First(&user).Error
+	userByName, err := s.userService.GetUserByName(username)
 	if err != nil {
 		s.log.Error(err)
 		return mc.UserNotFound
 	}
-	user.Authorized = false
-	err = s.client.DB.Save(&user).Error
+	userByName.Authorized = false
+	_, err = s.userService.UpdateUser(userByName.ID, *userByName)
 	if err != nil {
 		s.log.Error(err)
 		return mc.Fault
@@ -117,41 +113,38 @@ func (s *service) Logout(username string) error {
 }
 
 func (s *service) LastLogin(username string) (string, error) {
-	var user auth.User
-	err := s.client.DB.Model(auth.User{}).Where(&auth.User{Username: username}).First(&user).Error
+	userByName, err := s.userService.GetUserByName(username)
 	if err != nil {
 		s.log.Error(err)
 		return "", mc.UserNotFound
 	}
-	return s.LeftTime(user.LastJoin), nil
+	return s.LeftTime(userByName.LastJoin), nil
 }
 
-func (s *service) GetUser(username string) (*auth.User, error) {
-	var user auth.User
-	err := s.client.DB.Model(&auth.User{}).Where(&auth.User{Username: username}).First(&user).Error
+func (s *service) GetUser(username string) (*user.User, error) {
+	userByName, err := s.userService.GetUserByName(username)
 	if err != nil {
 		s.log.Error(err)
 		return nil, mc.UserNotFound
 	}
-	if user.Session.Sub(time.Now()) < 0 {
-		user.Authorized = false
+	if userByName.Session.Sub(time.Now()) < 0 {
+		userByName.Authorized = false
 	}
-	err = s.client.DB.Save(&user).Error
+	_, err = s.userService.UpdateUser(userByName.ID, *userByName)
 	if err != nil {
 		s.log.Error(err)
 		return nil, mc.Fault
 	}
-	return &user, nil
+	return userByName, nil
 }
 
 func (s *service) UnRegister(username string) error {
-	var user auth.User
-	err := s.client.DB.Model(&auth.User{}).Where(&auth.User{Username: username}).First(&user).Error
+	userByName, err := s.userService.GetUserByName(username)
 	if err != nil {
 		s.log.Error(err)
 		return mc.UserNotFound
 	}
-	err = s.client.DB.Delete(&user).Error
+	err = s.userService.RemoveUser(userByName.ID)
 	if err != nil {
 		s.log.Error(err)
 		return mc.Fault
@@ -163,29 +156,27 @@ func (s *service) LeftTime(t time.Time) string {
 	return timediff.TimeDiff(t, timediff.WithLocale("ru-RU"))
 }
 
-func (s *service) UpdateUser(user *auth.User) (*auth.User, error) {
-	user1 := &auth.User{}
+func (s *service) UpdateUser(user *user.User) (*user.User, error) {
 	if user.ID == 0 {
 		return nil, mc.UserNotFound
 	}
 	user.LastJoin = time.Now()
-	err := s.client.DB.Model(&auth.User{}).Where(&auth.User{ID: user.ID}).Updates(*user).First(user1).Error
+	u, err := s.userService.UpdateUser(user.ID, *user)
 	if err != nil {
 		s.log.Error(err)
 		return nil, mc.Fault
 	}
-	return user1, nil
+	return u, nil
 }
 
 func (s *service) UpdateLastServer(userId int64, server string) error {
-	user := &auth.User{}
-	err := s.client.DB.Model(&auth.User{}).Where(&auth.User{ID: uint32(userId)}).First(user).Error
+	u, err := s.userService.GetUserByID(uint32(userId))
 	if err != nil {
 		s.log.Error(err)
 		return mc.Fault
 	}
-	user.LastServer = server
-	err = s.client.DB.Save(user).Error
+	u.LastServer = server
+	_, err = s.userService.UpdateUser(uint32(userId), *u)
 	if err != nil {
 		s.log.Error(err)
 		return mc.Fault
@@ -193,30 +184,6 @@ func (s *service) UpdateLastServer(userId int64, server string) error {
 	return nil
 }
 
-func (s *service) GetLinkedUsers(userId int64) ([]auth.LinkUser, error) {
-	var users []auth.LinkUser
-	err := s.client.DB.Model(&auth.LinkUser{}).Where(&auth.LinkUser{UserID: userId}).Find(&users).Error
-	if err != nil {
-		s.log.Error(err)
-		return nil, mc.Fault
-	}
-	return users, nil
-}
-
-func (s *service) CountAccounts(ip string) (int, error) {
-	var size = 0
-	var users []auth.User
-	err := s.client.DB.Model(&auth.User{}).Where(&auth.User{RegisteredIP: ip}).Find(&users).Error
-	if err != nil {
-		s.log.Error(err)
-		return 0, mc.Fault
-	}
-	size += len(users)
-	err = s.client.DB.Model(&auth.User{}).Where(&auth.User{IP: ip}).Find(&users).Error
-	if err != nil {
-		s.log.Error(err)
-		return 0, mc.Fault
-	}
-	size += len(users)
-	return size / 2, nil
+func (s *service) GetLinkedUsers(userId int64) ([]user.LinkUser, error) {
+	return s.userService.GetLinkedUsers(userId)
 }

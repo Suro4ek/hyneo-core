@@ -3,8 +3,7 @@ package mc
 import (
 	"context"
 	"google.golang.org/protobuf/types/known/emptypb"
-	auth2 "hyneo/internal/auth"
-	"hyneo/pkg/mysql"
+	"hyneo/internal/user"
 	"hyneo/protos/auth"
 	"time"
 
@@ -12,59 +11,34 @@ import (
 )
 
 type routerService struct {
-	client  *mysql.Client
 	service Service
 	auth.UnimplementedAuthServer
 }
 
-func NewAuthRouter(client *mysql.Client, service Service) auth.AuthServer {
+func NewAuthRouter(service Service) auth.AuthServer {
 	return &routerService{
-		client:  client,
 		service: service,
 	}
 }
 
 func (r *routerService) Login(_ context.Context, res *auth.LoginRequest) (*auth.User, error) {
-	user, err := r.service.Login(res.User.Username, res.Password)
+	u, err := r.service.Login(res.User.Username, res.Password)
 	if err != nil {
 		return nil, err
 	}
-	return &auth.User{
-		Id:           user.ID,
-		Username:     user.Username,
-		LastLogin:    timestamppb.New(user.LastJoin),
-		Ip:           user.IP,
-		RegisteredIp: user.RegisteredIP,
-		LastServer:   user.LastServer,
-		Auth:         user.Authorized,
-		LocaleId:     0,
-	}, nil
+	return convertUserToGRPCUser(u), nil
 }
 
 func (r *routerService) Register(_ context.Context, res *auth.RegisterRequest) (*auth.User, error) {
-	user, err := r.service.Register(&auth2.User{
-		Username:     res.User.Username,
-		PasswordHash: res.Password,
-		LastJoin:     time.Now(),
-		Authorized:   true,
-		Session:      time.Now().Add(24 * time.Hour),
-		IP:           res.User.Ip,
-		RegisteredIP: res.User.RegisteredIp,
-		LastServer:   res.User.LastServer,
-	})
+	authUser := convertGRPUserToUser(res.GetUser())
+	authUser.LastJoin = time.Now()
+	authUser.Session = time.Now().Add(24 * time.Hour)
+	authUser.Authorized = true
+	u, err := r.service.Register(authUser)
 	if err != nil {
 		return nil, err
 	}
-	return &auth.User{
-		Id:           user.ID,
-		Username:     user.Username,
-		LastLogin:    timestamppb.New(user.LastJoin),
-		Ip:           user.IP,
-		RegisteredIp: user.RegisteredIP,
-		LastServer:   user.LastServer,
-		Auth:         user.Authorized,
-		LocaleId:     0,
-	}, nil
+	return convertUserToGRPCUser(u), nil
 }
 
 func (r *routerService) ChangePassword(_ context.Context, res *auth.ChangePasswordRequest) (*emptypb.Empty, error) {
@@ -102,27 +76,19 @@ func (r *routerService) LastLogin(_ context.Context, res *auth.LastLoginRequest)
 }
 
 func (r *routerService) GetUser(_ context.Context, res *auth.GetUserRequest) (*auth.GetUserResponse, error) {
-	user, err := r.service.GetUser(res.Username)
+	u, err := r.service.GetUser(res.Username)
 	if err != nil {
 		return nil, err
 	}
 	linked := false
-	users, err := r.service.GetLinkedUsers(int64(user.ID))
+	users, err := r.service.GetLinkedUsers(int64(u.ID))
 	if err == nil && len(users) > 0 {
 		linked = true
 	}
+	authUser := convertUserToGRPCUser(u)
+	authUser.Linked = linked
 	return &auth.GetUserResponse{
-		User: &auth.User{
-			Id:           user.ID,
-			Username:     user.Username,
-			LastLogin:    timestamppb.New(user.LastJoin),
-			Ip:           user.IP,
-			RegisteredIp: user.RegisteredIP,
-			LastServer:   user.LastServer,
-			Auth:         user.Authorized,
-			LocaleId:     0,
-			Linked:       linked,
-		},
+		User: authUser,
 	}, nil
 }
 
@@ -135,17 +101,23 @@ func (r *routerService) UnRegister(_ context.Context, res *auth.UnRegisterReques
 }
 
 func (r *routerService) UpdateUser(_ context.Context, res *auth.UpdateUserRequest) (*auth.User, error) {
-	user, err := r.service.UpdateUser(&auth2.User{
-		ID:         res.User.Id,
-		Username:   res.User.Username,
-		LastJoin:   res.User.LastLogin.AsTime(),
-		Authorized: res.User.Auth,
-		IP:         res.User.Ip,
-		LastServer: res.User.LastServer,
-	})
+	//TODO check is null??? GetUser()
+	u, err := r.service.UpdateUser(convertGRPUserToUser(res.GetUser()))
 	if err != nil {
 		return nil, err
 	}
+	return convertUserToGRPCUser(u), nil
+}
+
+func (r *routerService) UpdateLastServer(ctx context.Context, res *auth.UpdateLastServerRequest) (*emptypb.Empty, error) {
+	err := r.service.UpdateLastServer(int64(res.GetUserId()), res.GetLastServer())
+	if err != nil {
+		return nil, err
+	}
+	return &emptypb.Empty{}, nil
+}
+
+func convertUserToGRPCUser(user *user.User) *auth.User {
 	return &auth.User{
 		Id:           user.ID,
 		Username:     user.Username,
@@ -155,13 +127,16 @@ func (r *routerService) UpdateUser(_ context.Context, res *auth.UpdateUserReques
 		LastServer:   user.LastServer,
 		Auth:         user.Authorized,
 		LocaleId:     0,
-	}, nil
+	}
 }
 
-func (r *routerService) UpdateLastServer(ctx context.Context, res *auth.UpdateLastServerRequest) (*emptypb.Empty, error) {
-	err := r.service.UpdateLastServer(int64(res.GetUserId()), res.GetLastServer())
-	if err != nil {
-		return nil, err
+func convertGRPUserToUser(authUser *auth.User) *user.User {
+	return &user.User{
+		ID:         authUser.Id,
+		Username:   authUser.Username,
+		LastJoin:   authUser.LastLogin.AsTime(),
+		Authorized: authUser.Auth,
+		IP:         authUser.Ip,
+		LastServer: authUser.LastServer,
 	}
-	return &emptypb.Empty{}, nil
 }

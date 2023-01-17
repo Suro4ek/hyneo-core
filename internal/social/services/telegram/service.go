@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"github.com/go-redis/redis/v9"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"hyneo/internal/auth"
 	"hyneo/internal/auth/code"
 	"hyneo/internal/auth/password"
 	"hyneo/internal/social/services"
+	"hyneo/internal/user"
 	"hyneo/pkg/logging"
 	"hyneo/pkg/mysql"
 )
@@ -49,7 +49,7 @@ func (s *telegramService) SendMessage(message string, chatID int64) {
 }
 
 /*
-	Получение данных сервиса
+Получение данных сервиса
 */
 func (s *telegramService) GetService() *services.GetService {
 	return &services.GetService{
@@ -61,9 +61,9 @@ func (s *telegramService) GetService() *services.GetService {
 	}
 }
 
-func (s *telegramService) GetUser(ID int64) (user1 []auth.LinkUser, err error) {
-	var users []auth.LinkUser
-	err = s.Client.DB.Model(&auth.LinkUser{}).Where(&auth.LinkUser{
+func (s *telegramService) GetUser(ID int64) (user1 []user.LinkUser, err error) {
+	var users []user.LinkUser
+	err = s.Client.DB.Model(&user.LinkUser{}).Where(&user.LinkUser{
 		ServiceId:     s.ServiceID,
 		ServiceUserID: ID,
 	}).First(&users).Error
@@ -75,11 +75,11 @@ func (s *telegramService) GetUser(ID int64) (user1 []auth.LinkUser, err error) {
 }
 
 /*
-	Получение *auth.User по никнейму в игре
+Получение *user.User по никнейму в игре
 */
-func (s *telegramService) GetMCUser(username string) (*auth.User, error) {
-	var user auth.User
-	err := s.Client.DB.Model(&auth.User{}).Where("username = ?", username).First(&user).Error
+func (s *telegramService) GetMCUser(username string) (*user.User, error) {
+	var user user.User
+	err := s.Client.DB.Model(&user.User{}).Where("username = ?", username).First(&user).Error
 	if err != nil {
 		s.log.Error(err)
 		return nil, err
@@ -88,11 +88,11 @@ func (s *telegramService) GetMCUser(username string) (*auth.User, error) {
 }
 
 /*
-	Получение
+Получение
 */
-func (s *telegramService) GetUserID(userId int64) (user1 *auth.LinkUser, err error) {
-	var user auth.LinkUser
-	err = s.Client.DB.Model(&auth.LinkUser{}).Joins("User").Where(auth.LinkUser{
+func (s *telegramService) GetUserID(userId int64) (user1 *user.LinkUser, err error) {
+	var user user.LinkUser
+	err = s.Client.DB.Model(&user.LinkUser{}).Joins("User").Where(user.LinkUser{
 		UserID: userId,
 	}).Find(&user).Error
 	if err != nil {
@@ -114,7 +114,7 @@ func (s *telegramService) ClearKeyboard(message string, chatID int64) {
 	s.SendMessage(message, chatID)
 }
 
-func (s *telegramService) AccountKeyboard(message string, chatID int64, user auth.LinkUser) {
+func (s *telegramService) AccountKeyboard(message string, chatID int64, user user.LinkUser) {
 	msg := tgbotapi.NewMessage(chatID, message)
 	keyBoard := s.SoloUserKeyBoard(user)
 	keyBoard.InlineKeyboard = append(keyBoard.InlineKeyboard,
@@ -128,7 +128,7 @@ func (s *telegramService) AccountKeyboard(message string, chatID int64, user aut
 	}
 }
 
-func (s *telegramService) SoloUserKeyBoard(user auth.LinkUser) tgbotapi.InlineKeyboardMarkup {
+func (s *telegramService) SoloUserKeyBoard(user user.LinkUser) tgbotapi.InlineKeyboardMarkup {
 	buttons := tgbotapi.NewInlineKeyboardMarkup()
 	buttons.InlineKeyboard = append(buttons.InlineKeyboard, tgbotapi.NewInlineKeyboardRow(
 		tgbotapi.NewInlineKeyboardButtonData("Информация о аккаунте", fmt.Sprintf("status %d", user.User.ID))))
@@ -160,8 +160,8 @@ func (s *telegramService) SoloUserKeyBoard(user auth.LinkUser) tgbotapi.InlineKe
 }
 
 func (s *telegramService) SendKeyboard(message string, chatId int64) {
-	var users []auth.LinkUser
-	err := s.Client.DB.Model(&auth.LinkUser{}).Joins("User").Where(auth.LinkUser{
+	var users []user.LinkUser
+	err := s.Client.DB.Model(&user.LinkUser{}).Joins("User").Where(user.LinkUser{
 		ServiceId:     s.ServiceID,
 		ServiceUserID: chatId}).Find(&users).Error
 	if err != nil {

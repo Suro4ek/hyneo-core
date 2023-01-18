@@ -1,7 +1,6 @@
 package user
 
 import (
-	"hyneo/internal/auth/mc"
 	"hyneo/pkg/logging"
 	"time"
 )
@@ -21,7 +20,7 @@ func (s *UserService) GetUser(username string) (*User, error) {
 	userByName, err := s.userService.GetUserByName(username)
 	if err != nil {
 		s.log.Error(err)
-		return nil, mc.UserNotFound
+		return nil, UserNotFound
 	}
 	if userByName.Session.Sub(time.Now()) < 0 {
 		userByName.Authorized = false
@@ -29,20 +28,20 @@ func (s *UserService) GetUser(username string) (*User, error) {
 	_, err = s.userService.UpdateUser(userByName.ID, *userByName)
 	if err != nil {
 		s.log.Error(err)
-		return nil, mc.Fault
+		return nil, Fault
 	}
 	return userByName, nil
 }
 
 func (s *UserService) UpdateUser(user *User) (*User, error) {
 	if user.ID == 0 {
-		return nil, mc.UserNotFound
+		return nil, UserNotFound
 	}
 	user.LastJoin = time.Now()
 	u, err := s.userService.UpdateUser(user.ID, *user)
 	if err != nil {
 		s.log.Error(err)
-		return nil, mc.Fault
+		return nil, Fault
 	}
 	return u, nil
 }

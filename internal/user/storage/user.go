@@ -3,7 +3,6 @@ package storage
 import (
 	"context"
 	"github.com/go-redis/redis/v9"
-	"hyneo/internal/auth/mc"
 	"hyneo/internal/user"
 	"hyneo/pkg/mysql"
 	"strconv"
@@ -61,12 +60,12 @@ func (s storageUser) CountAccounts(ip string) (int, error) {
 	var users []user.User
 	err := s.client.DB.Model(&user.User{}).Where(&user.User{RegisteredIP: ip}).Find(&users).Error
 	if err != nil {
-		return 0, mc.Fault
+		return 0, user.Fault
 	}
 	size += len(users)
 	err = s.client.DB.Model(&user.User{}).Where(&user.User{IP: ip}).Find(&users).Error
 	if err != nil {
-		return 0, mc.Fault
+		return 0, user.Fault
 	}
 	size += len(users)
 	return size / 2, nil
@@ -119,7 +118,7 @@ func (s storageUser) GetLinkedUsers(userId int64) ([]user.LinkUser, error) {
 	var users []user.LinkUser
 	err := s.client.DB.Model(&user.LinkUser{}).Where(&user.LinkUser{UserID: userId}).Find(&users).Error
 	if err != nil {
-		return nil, mc.Fault
+		return nil, user.Fault
 	}
 	return users, nil
 }

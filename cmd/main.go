@@ -55,6 +55,10 @@ func migrate(client *mysql.Client) {
 	if err != nil {
 		return
 	}
+	err = client.DB.AutoMigrate(&user.IgnoreUser{})
+	if err != nil {
+		return
+	}
 }
 
 func runGRPCServer(

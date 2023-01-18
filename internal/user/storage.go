@@ -24,4 +24,8 @@ type Service interface {
 	CountAccounts(ip string) (int, error)
 
 	GetLinkedUsers(userId int64) ([]LinkUser, error)
+
+	AddIgnore(userId uint32, ignoreUserId int32) error
+	RemoveIgnore(userId uint32, ignoreUserId int32) error
+	GetIgnore(userId uint32) (*[]IgnoreUser, error)
 }

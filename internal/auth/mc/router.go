@@ -75,38 +75,12 @@ func (r *routerService) LastLogin(_ context.Context, res *auth.LastLoginRequest)
 	}, nil
 }
 
-func (r *routerService) GetUser(_ context.Context, res *auth.GetUserRequest) (*auth.GetUserResponse, error) {
-	u, err := r.service.GetUser(res.Username)
-	if err != nil {
-		return nil, err
-	}
-	linked := false
-	users, err := r.service.GetLinkedUsers(int64(u.ID))
-	if err == nil && len(users) > 0 {
-		linked = true
-	}
-	authUser := convertUserToGRPCUser(u)
-	authUser.Linked = linked
-	return &auth.GetUserResponse{
-		User: authUser,
-	}, nil
-}
-
 func (r *routerService) UnRegister(_ context.Context, res *auth.UnRegisterRequest) (*emptypb.Empty, error) {
 	err := r.service.UnRegister(res.Username)
 	if err != nil {
 		return nil, err
 	}
 	return &emptypb.Empty{}, nil
-}
-
-func (r *routerService) UpdateUser(_ context.Context, res *auth.UpdateUserRequest) (*auth.User, error) {
-	//TODO check is null??? GetUser()
-	u, err := r.service.UpdateUser(convertGRPUserToUser(res.GetUser()))
-	if err != nil {
-		return nil, err
-	}
-	return convertUserToGRPCUser(u), nil
 }
 
 func (r *routerService) UpdateLastServer(ctx context.Context, res *auth.UpdateLastServerRequest) (*emptypb.Empty, error) {

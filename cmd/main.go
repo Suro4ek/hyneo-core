@@ -35,12 +35,15 @@ func main() {
 	}
 	logger.Info("Register services")
 	passwordService := password.NewPasswordService()
-	userService := storage.CreateStorageUser(client)
-	runServices := RunServices(cfg, codeService, redisClient, &logger, passwordService, userService)
+
+	storageUser := storage.CreateStorageUser(client)
+	userService := user.CreateUserService(storageUser)
+
+	runServices := RunServices(cfg, codeService, redisClient, &logger, passwordService, storageUser)
 	logger.Info("Register commands")
 	command.RegisterCommands()
 	logger.Info("Run GRPC Server to " + cfg.GRPCPort)
-	runGRPCServer(runServices, client, *cfg, &logger, passwordService, userService)
+	runGRPCServer(runServices, client, *cfg, &logger, passwordService, storageUser, *userService)
 }
 
 func migrate(client *mysql.Client) {
@@ -60,7 +63,8 @@ func runGRPCServer(
 	cfg config.Config,
 	log *logging.Logger,
 	passwordService password.Service,
-	userService user.Service,
+	storageUser user.Service,
+	userService user.UserService,
 ) {
 	addr := "0.0.0.0:" + cfg.GRPCPort
 	lis, err := net.Listen("tcp", addr)
@@ -69,11 +73,14 @@ func runGRPCServer(
 	}
 	s := grpc.NewServer()
 
-	serviceAuth := service2.NewMCService(passwordService, log, userService)
+	serviceAuth := service2.NewMCService(passwordService, log, storageUser)
 	authService := mc.NewAuthRouter(serviceAuth)
 	auth.RegisterAuthServer(s, authService)
+	userRouter := user.NewUserRouter(userService)
+	auth.RegisterUserServiceServer(s, userRouter)
 
 	service := services2.NewServiceRouter(client, servicess)
+
 	serviceRouter.RegisterServiceServer(s, service)
 
 	if err := s.Serve(lis); err != nil {

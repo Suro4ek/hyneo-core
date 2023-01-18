@@ -19,6 +19,27 @@ service Auth {
 service UserService {
     rpc UpdateUser(UpdateUserRequest) returns (User) {}
     rpc GetUser(GetUserRequest) returns (GetUserResponse) {}
+    rpc AddIgnore(AddIgnoreRequest) returns (google.protobuf.Empty) {}
+    rpc RemoveIgnore(RemoveIgnoreRequest) returns (google.protobuf.Empty) {}
+    rpc GetIgnoreList(GetIgnoreListRequest) returns (GetIgnoreListResponse) {}
+}
+
+message AddIgnoreRequest {
+    int32 user_id = 1;
+    int32 ignore_id = 2;
+}
+
+message RemoveIgnoreRequest {
+    int32 user_id = 1;
+    int32 ignore_id = 2;
+}
+
+message GetIgnoreListRequest {
+    int32 user_id = 1;
+}
+
+message GetIgnoreListResponse {
+    repeated int32 ignore_list = 1 [packed=true];
 }
 
 message User {

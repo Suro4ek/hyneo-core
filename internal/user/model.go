@@ -14,7 +14,6 @@ type User struct {
 	Authorized   bool      `json:"authorized"`
 }
 
-// TODO redis cache
 type IgnoreUser struct {
 	ID         uint32 `json:"id" redis:"-"`
 	UserID     uint32 `json:"user_id" redis:"-"` //if user id == -1 is all, is user id != -1

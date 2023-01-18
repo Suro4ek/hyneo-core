@@ -7,10 +7,6 @@ import (
 
 type Service interface {
 	/*
-	  Количетсво привязанных аккаунтов
-	*/
-	GetLinkedUsers(userId int64) ([]user.LinkUser, error)
-	/*
 			Login авторизации принимающие в себя
 			username, password и возращает пользователя,
 		    если есть такой пользователь и пароль коректный,
@@ -53,13 +49,7 @@ type Service interface {
 		Либо возращяет ошибку, что пользователь не найден
 	*/
 	LastLogin(username string) (string, error)
-	/*
-		GetUser возращяет пользователя по имя пользователя
-		Возращяет так же ошибку, если пользователь не найден
-		UserNotFound или ошибку с бд Fault,
-		так же проверяет сессию игрока
-	*/
-	GetUser(id string) (*user.User, error)
+
 	/*
 	   	UnRegister удаление пользователя
 	   	Удаляет пользователя по имя пользователя
@@ -71,12 +61,6 @@ type Service interface {
 		LeftTime превращяющая time.Time в строку и сколько прошло с данного момента
 	*/
 	LeftTime(t time.Time) string
-	/*
-		UpdateUser обновления пользователя
-		Вводные данные пользователь
-		ищет пользователя в бд и обновляет его данные в бд
-	*/
-	UpdateUser(user *user.User) (*user.User, error)
 	/*
 		UpdateLastServer обновления последнего сервера
 	*/

@@ -120,23 +120,6 @@ func (s *service) LastLogin(username string) (string, error) {
 	return s.LeftTime(userByName.LastJoin), nil
 }
 
-func (s *service) GetUser(username string) (*user.User, error) {
-	userByName, err := s.userService.GetUserByName(username)
-	if err != nil {
-		s.log.Error(err)
-		return nil, mc.UserNotFound
-	}
-	if userByName.Session.Sub(time.Now()) < 0 {
-		userByName.Authorized = false
-	}
-	_, err = s.userService.UpdateUser(userByName.ID, *userByName)
-	if err != nil {
-		s.log.Error(err)
-		return nil, mc.Fault
-	}
-	return userByName, nil
-}
-
 func (s *service) UnRegister(username string) error {
 	userByName, err := s.userService.GetUserByName(username)
 	if err != nil {
@@ -155,19 +138,6 @@ func (s *service) LeftTime(t time.Time) string {
 	return timediff.TimeDiff(t, timediff.WithLocale("ru-RU"))
 }
 
-func (s *service) UpdateUser(user *user.User) (*user.User, error) {
-	if user.ID == 0 {
-		return nil, mc.UserNotFound
-	}
-	user.LastJoin = time.Now()
-	u, err := s.userService.UpdateUser(user.ID, *user)
-	if err != nil {
-		s.log.Error(err)
-		return nil, mc.Fault
-	}
-	return u, nil
-}
-
 func (s *service) UpdateLastServer(userId int64, server string) error {
 	u, err := s.userService.GetUserByID(uint32(userId))
 	if err != nil {
@@ -181,8 +151,4 @@ func (s *service) UpdateLastServer(userId int64, server string) error {
 		return mc.Fault
 	}
 	return nil
-}
-
-func (s *service) GetLinkedUsers(userId int64) ([]user.LinkUser, error) {
-	return s.userService.GetLinkedUsers(userId)
 }

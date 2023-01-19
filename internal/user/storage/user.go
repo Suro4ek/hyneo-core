@@ -195,6 +195,7 @@ func (s storageUser) GetIgnore(userId int64) (*[]user.IgnoreUser, error) {
 			Preload("Users").
 			Where(&user.IgnoreUser{UserID: userId}).
 			Find(&users).Error
+		fmt.Println(users)
 		if err != nil {
 			return nil, err
 		}

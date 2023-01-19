@@ -33,7 +33,7 @@ func (r *serviceRouter) NotifyServer(_ context.Context, res *service.NotifyServe
 		if u.ServiceId != s.GetService().ServiceID {
 			continue
 		}
-		s.SendMessage("Вы подключились к серверу "+res.GetServer(), u.ServiceUserID)
+		s.SendMessage("Вы подключились к серверу "+res.GetServerName(), u.ServiceUserID)
 	}
 	return &emptypb.Empty{}, nil
 }

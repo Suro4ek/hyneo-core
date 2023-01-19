@@ -140,7 +140,8 @@ func (s storageUser) AddIgnore(userId uint32, ignoreUserId int32) error {
 		if err != nil {
 			return err
 		}
-		err = s.redis.HSet(context.TODO(), "ignore:"+strconv.Itoa(int(userId)), strconv.Itoa(int(-1))).Err()
+		err = s.redis.HSet(context.TODO(), "ignore:"+strconv.Itoa(int(userId)), strconv.Itoa(-1)).Err()
+		fmt.Println("ignore:"+strconv.Itoa(int(userId)), strconv.Itoa(-1))
 		if err != nil {
 			return err
 		}

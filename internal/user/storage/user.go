@@ -92,7 +92,7 @@ func (s storageUser) GetLinkUserByUserID(id int64) (*user.LinkUser, error) {
 	var getUserLink user.LinkUser
 	err := s.client.DB.
 		Model(&user.LinkUser{}).
-		Joins("left join users on users.id = link_users.user_id").
+		Joins("User").
 		Where(&user.LinkUser{UserID: id}).
 		First(&getUserLink).Error
 	return &getUserLink, err
@@ -152,7 +152,7 @@ func (s storageUser) AddIgnore(userId int64, ignoreUserId int64) error {
 		if err != nil {
 			return err
 		}
-		err = s.client.DB.Model(&user.IgnoreUser{}).Joins("left join users on users.id = ignore_users.id").Where(&user.IgnoreUser{UserID: userId, IgnoreID: ignoreUserId}).First(u).Error
+		err = s.client.DB.Model(&user.IgnoreUser{}).Joins("User", s.client.DB.Where(&user.User{ID: ignoreUserId})).Where(&user.IgnoreUser{UserID: userId, IgnoreID: ignoreUserId}).First(u).Error
 		if err != nil {
 			return err
 		}
@@ -188,7 +188,7 @@ func (s storageUser) GetIgnore(userId int64) (*[]user.IgnoreUser, error) {
 	if err != nil {
 		err := s.client.DB.
 			Model(&user.IgnoreUser{}).
-			Joins("left join users on users.id = ignore_users.id").
+			Joins("User").
 			Where(&user.IgnoreUser{UserID: userId}).
 			Find(&users).Error
 		if err != nil {

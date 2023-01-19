@@ -3,7 +3,7 @@ package user
 import "time"
 
 type User struct {
-	ID           int64     `json:"id"`
+	ID           int64     `json:"id" gorm:"primary_key;auto_increment"`
 	Username     string    `json:"username"`
 	PasswordHash string    `json:"password_hash"`
 	RegisteredIP string    `json:"registered_ip"`

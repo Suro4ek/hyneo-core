@@ -38,8 +38,13 @@ message GetIgnoreListRequest {
     int32 user_id = 1;
 }
 
+message IgnoreUser{
+    int32 id = 1;
+    string username = 2;
+}
+
 message GetIgnoreListResponse {
-    repeated int32 ignore_list = 1 [packed=true];
+    repeated IgnoreUser ignore_list = 1;
 }
 
 message User {

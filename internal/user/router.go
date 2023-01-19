@@ -69,11 +69,15 @@ func (r userRouter) GetIgnoreList(ctx context.Context, res *auth.GetIgnoreListRe
 	}, nil
 }
 
-//convert ignoreList to int32[]
-func convertIgnoreListToGRPC(ignoreList []IgnoreUser) []int32 {
-	var ignoreListGRPC []int32
+//convert ignoreList to auth.IgnoreUser[]
+func convertIgnoreListToGRPC(ignoreList []IgnoreUser) []*auth.IgnoreUser {
+	var ignoreListGRPC []*auth.IgnoreUser
 	for _, ignore := range ignoreList {
-		ignoreListGRPC = append(ignoreListGRPC, ignore.IgnoreID)
+		ignoreListGRPC = append(ignoreListGRPC,
+			&auth.IgnoreUser{
+				Id:       ignore.IgnoreID,
+				Username: ignore.IgnoreUser.Username,
+			})
 	}
 	return ignoreListGRPC
 }

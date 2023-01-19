@@ -2,7 +2,6 @@ package storage
 
 import (
 	"context"
-	"fmt"
 	"github.com/go-redis/redis/v9"
 	"hyneo/internal/user"
 	"hyneo/pkg/mysql"
@@ -140,19 +139,19 @@ func (s storageUser) AddIgnore(userId uint32, ignoreUserId int32) error {
 		if err != nil {
 			return err
 		}
-		err = s.redis.SAdd(context.TODO(), "user:"+strconv.Itoa(int(userId))+":ignores", strconv.Itoa(-1)).Err()
-		fmt.Println("ignore:"+strconv.Itoa(int(userId)), strconv.Itoa(-1))
+		err = s.redis.HSet(context.TODO(), "user:"+strconv.Itoa(int(userId))+":ignores", strconv.Itoa(-1), "null").Err()
 		if err != nil {
 			return err
 		}
 		err = s.redis.Expire(context.TODO(), "user:"+strconv.Itoa(int(userId))+":ignores", time.Second*60).Err()
 		return err
 	} else {
-		err := s.client.DB.Create(&user.IgnoreUser{UserID: userId, IgnoreID: ignoreUserId}).Error
+		u := &user.IgnoreUser{}
+		err := s.client.DB.Create(&user.IgnoreUser{UserID: userId, IgnoreID: ignoreUserId}).Joins("User").Find(u).Error
 		if err != nil {
 			return err
 		}
-		err = s.redis.SAdd(context.TODO(), "user:"+strconv.Itoa(int(userId))+":ignores", strconv.Itoa(int(ignoreUserId))).Err()
+		err = s.redis.HSet(context.TODO(), "user:"+strconv.Itoa(int(userId))+":ignores", strconv.Itoa(int(ignoreUserId)), u.IgnoreUser.Username).Err()
 		if err != nil {
 			return err
 		}
@@ -171,7 +170,7 @@ func (s storageUser) RemoveIgnore(userId uint32, ignoreUserId int32) error {
 	if err != nil {
 		return err
 	}
-	err = s.redis.SRem(context.TODO(), "user:"+strconv.Itoa(int(userId))+":ignores", strconv.Itoa(int(ignoreUserId))).Err()
+	err = s.redis.HDel(context.TODO(), "user:"+strconv.Itoa(int(userId))+":ignores", strconv.Itoa(int(ignoreUserId))).Err()
 	if err != nil {
 		return err
 	}
@@ -180,11 +179,12 @@ func (s storageUser) RemoveIgnore(userId uint32, ignoreUserId int32) error {
 
 func (s storageUser) GetIgnore(userId uint32) (*[]user.IgnoreUser, error) {
 	var users []user.IgnoreUser
-	keys, err := s.redis.SMembers(context.TODO(), "user:"+strconv.Itoa(int(userId))+":ignores").Result()
+	keys, err := s.redis.HKeys(context.TODO(), "user:"+strconv.Itoa(int(userId))+":ignores").Result()
 	if err != nil {
 		err := s.client.DB.
 			Model(&user.IgnoreUser{}).
 			Where(&user.IgnoreUser{UserID: userId}).
+			Joins("User").
 			Find(&users).Error
 		if err != nil {
 			return nil, err
@@ -192,7 +192,7 @@ func (s storageUser) GetIgnore(userId uint32) (*[]user.IgnoreUser, error) {
 		ctx := context.TODO()
 		if _, err := s.redis.Pipelined(ctx, func(rdb redis.Pipeliner) error {
 			for _, u := range users {
-				rdb.SAdd(ctx, "user:"+strconv.Itoa(int(userId))+":ignores", strconv.Itoa(int(u.IgnoreID)))
+				rdb.HSet(ctx, "user:"+strconv.Itoa(int(userId))+":ignores", strconv.Itoa(int(u.IgnoreID)), u.IgnoreUser.Username)
 			}
 			return nil
 		}); err != nil {
@@ -204,9 +204,9 @@ func (s storageUser) GetIgnore(userId uint32) (*[]user.IgnoreUser, error) {
 		}
 	} else {
 		for _, key := range keys {
-			fmt.Print(key)
+			useranem, _ := s.redis.HGet(context.TODO(), "user:"+strconv.Itoa(int(userId))+":ignores", key).Result()
 			keyInt, _ := strconv.ParseInt(key, 10, 32)
-			users = append(users, user.IgnoreUser{IgnoreID: int32(keyInt)})
+			users = append(users, user.IgnoreUser{IgnoreID: int32(keyInt), IgnoreUser: user.User{Username: useranem}})
 		}
 	}
 	return &users, err

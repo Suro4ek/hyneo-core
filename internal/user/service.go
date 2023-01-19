@@ -21,7 +21,7 @@ func (s *UserService) GetUser(username string) (*User, error) {
 	userByName, err := s.userService.GetUserByName(username)
 	if err != nil {
 		s.log.Error(err)
-		return nil, UserNotFound
+		return nil, NotFound
 	}
 	if userByName.Session.Sub(time.Now()) < 0 {
 		userByName.Authorized = false
@@ -36,7 +36,7 @@ func (s *UserService) GetUser(username string) (*User, error) {
 
 func (s *UserService) UpdateUser(user *User) (*User, error) {
 	if user.ID == 0 {
-		return nil, UserNotFound
+		return nil, NotFound
 	}
 	user.LastJoin = time.Now()
 	u, err := s.userService.UpdateUser(user.ID, *user)

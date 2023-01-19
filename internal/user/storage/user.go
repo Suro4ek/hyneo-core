@@ -23,9 +23,9 @@ func CreateStorageUser(client *mysql.Client, redis *redis.Client) user.Service {
 	}
 }
 
-func (s storageUser) CreateUser(user user.User) (*user.User, error) {
-	err := s.client.DB.Create(&user).Error
-	return &user, err
+func (s storageUser) CreateUser(user1 user.User) (*user.User, error) {
+	err := s.client.DB.Create(&user1).Where(&user.User{Username: user1.Username}).First(&user1).Error
+	return &user1, err
 }
 
 func (s storageUser) GetUserByID(id int64) (*user.User, error) {

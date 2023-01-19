@@ -29,6 +29,7 @@ func (s storageUser) CreateUser(user1 user.User) (*user.User, error) {
 		return nil, err
 	}
 	err = s.client.DB.Model(&user1).Where(&user.User{Username: user1.Username}).First(&user1).Error
+	fmt.Println(user1)
 	return &user1, err
 }
 

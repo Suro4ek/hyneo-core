@@ -27,21 +27,22 @@ func (s storageUser) CreateUser(user user.User) (*user.User, error) {
 }
 
 func (s storageUser) GetUserByID(id uint32) (*user.User, error) {
-	var getUser *user.User
+	var getUser user.User
 	err := s.client.DB.
 		Model(&user.User{}).
 		Where(&user.User{ID: id}).
-		First(getUser).Error
-	return getUser, err
+		First(&getUser).
+		Error
+	return &getUser, err
 }
 
 func (s storageUser) GetUserByName(username string) (*user.User, error) {
-	var getUser *user.User
+	var getUser user.User
 	err := s.client.DB.
 		Model(&user.User{}).
 		Where(&user.User{Username: strings.ToLower(username)}).
-		First(getUser).Error
-	return getUser, err
+		First(&getUser).Error
+	return &getUser, err
 }
 
 func (s storageUser) UpdateUser(id uint32, updateUser user.User) (*user.User, error) {
@@ -77,22 +78,22 @@ func (s storageUser) CreateLinkUser(user user.LinkUser) (*user.LinkUser, error) 
 }
 
 func (s storageUser) GetLinkUserByID(id uint32) (*user.LinkUser, error) {
-	var getUserLink *user.LinkUser
+	var getUserLink user.LinkUser
 	err := s.client.DB.
 		Model(&user.LinkUser{}).
 		Where(&user.LinkUser{ID: id}).
-		First(getUserLink).Error
-	return getUserLink, err
+		First(&getUserLink).Error
+	return &getUserLink, err
 }
 
 func (s storageUser) GetLinkUserByUserID(id int64) (*user.LinkUser, error) {
-	var getUserLink *user.LinkUser
+	var getUserLink user.LinkUser
 	err := s.client.DB.
 		Model(&user.LinkUser{}).
 		Joins("User").
 		Where(&user.LinkUser{UserID: id}).
-		First(getUserLink).Error
-	return getUserLink, err
+		First(&getUserLink).Error
+	return &getUserLink, err
 }
 
 func (s storageUser) UpdateLinkUser(id uint32, updateUser user.LinkUser) (*user.LinkUser, error) {
@@ -106,12 +107,12 @@ func (s storageUser) RemoveLinkUser(id uint32) error {
 }
 
 func (s storageUser) GetLinkUserByServiceIdAndServiceUserID(id int64, serviceID int) (*[]user.LinkUser, error) {
-	var users *[]user.LinkUser
+	var users []user.LinkUser
 	err := s.client.DB.Model(&user.LinkUser{}).Where(&user.LinkUser{
 		ServiceId:     serviceID,
 		ServiceUserID: id,
 	}).First(&users).Error
-	return users, err
+	return &users, err
 }
 
 func (s storageUser) GetLinkedUsers(userId int64) ([]user.LinkUser, error) {

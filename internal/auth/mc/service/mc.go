@@ -139,13 +139,13 @@ func (s *service) LeftTime(t time.Time) string {
 }
 
 func (s *service) UpdateLastServer(userId int64, server string) error {
-	u, err := s.userService.GetUserByID(uint32(userId))
+	u, err := s.userService.GetUserByID(userId)
 	if err != nil {
 		s.log.Error(err)
 		return mc.Fault
 	}
 	u.LastServer = server
-	_, err = s.userService.UpdateUser(uint32(userId), *u)
+	_, err = s.userService.UpdateUser(userId, *u)
 	if err != nil {
 		s.log.Error(err)
 		return mc.Fault

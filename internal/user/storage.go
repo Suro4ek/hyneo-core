@@ -3,12 +3,12 @@ package user
 type Service interface {
 	CreateUser(user User) (*User, error)
 
-	GetUserByID(id uint32) (*User, error)
+	GetUserByID(id int64) (*User, error)
 	GetUserByName(username string) (*User, error)
 
-	UpdateUser(id uint32, user User) (*User, error)
+	UpdateUser(id int64, user User) (*User, error)
 
-	RemoveUser(id uint32) error
+	RemoveUser(id int64) error
 
 	CreateLinkUser(user LinkUser) (*LinkUser, error)
 
@@ -25,7 +25,7 @@ type Service interface {
 
 	GetLinkedUsers(userId int64) ([]LinkUser, error)
 
-	AddIgnore(userId uint32, ignoreUserId int32) error
-	RemoveIgnore(userId uint32, ignoreUserId int32) error
-	GetIgnore(userId uint32) (*[]IgnoreUser, error)
+	AddIgnore(userId int64, ignoreUserId int64) error
+	RemoveIgnore(userId int64, ignoreUserId int64) error
+	GetIgnore(userId int64) (*[]IgnoreUser, error)
 }

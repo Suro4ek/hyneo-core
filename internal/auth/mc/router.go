@@ -93,7 +93,7 @@ func (r *routerService) UpdateLastServer(ctx context.Context, res *auth.UpdateLa
 
 func convertUserToGRPCUser(user *user.User) *auth.User {
 	return &auth.User{
-		Id:           user.ID,
+		Id:           int64(user.ID),
 		Username:     user.Username,
 		LastLogin:    timestamppb.New(user.LastJoin),
 		Ip:           user.IP,
@@ -106,7 +106,7 @@ func convertUserToGRPCUser(user *user.User) *auth.User {
 
 func convertGRPUserToUser(authUser *auth.User) *user.User {
 	return &user.User{
-		ID:         authUser.Id,
+		ID:         int64(authUser.Id),
 		Username:   authUser.Username,
 		LastJoin:   authUser.LastLogin.AsTime(),
 		Authorized: authUser.Auth,

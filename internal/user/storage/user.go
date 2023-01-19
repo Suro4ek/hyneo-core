@@ -27,7 +27,7 @@ func (s storageUser) CreateUser(user user.User) (*user.User, error) {
 	return &user, err
 }
 
-func (s storageUser) GetUserByID(id uint32) (*user.User, error) {
+func (s storageUser) GetUserByID(id int64) (*user.User, error) {
 	var getUser user.User
 	err := s.client.DB.
 		Model(&user.User{}).
@@ -46,12 +46,12 @@ func (s storageUser) GetUserByName(username string) (*user.User, error) {
 	return &getUser, err
 }
 
-func (s storageUser) UpdateUser(id uint32, updateUser user.User) (*user.User, error) {
+func (s storageUser) UpdateUser(id int64, updateUser user.User) (*user.User, error) {
 	err := s.client.DB.Model(&user.User{}).Where(&user.User{ID: id}).Updates(updateUser).First(&updateUser).Error
 	return &updateUser, err
 }
 
-func (s storageUser) RemoveUser(id uint32) error {
+func (s storageUser) RemoveUser(id int64) error {
 	err := s.client.DB.Delete(&user.User{}, id).Error
 	return err
 }
@@ -125,7 +125,7 @@ func (s storageUser) GetLinkedUsers(userId int64) ([]user.LinkUser, error) {
 	return users, nil
 }
 
-func (s storageUser) AddIgnore(userId uint32, ignoreUserId int32) error {
+func (s storageUser) AddIgnore(userId int64, ignoreUserId int64) error {
 	if ignoreUserId == -1 {
 		err := s.client.DB.
 			Model(&user.IgnoreUser{}).
@@ -160,7 +160,7 @@ func (s storageUser) AddIgnore(userId uint32, ignoreUserId int32) error {
 	}
 }
 
-func (s storageUser) RemoveIgnore(userId uint32, ignoreUserId int32) error {
+func (s storageUser) RemoveIgnore(userId int64, ignoreUserId int64) error {
 	err := s.client.DB.
 		Model(&user.IgnoreUser{}).
 		Where(&user.IgnoreUser{
@@ -177,7 +177,7 @@ func (s storageUser) RemoveIgnore(userId uint32, ignoreUserId int32) error {
 	return err
 }
 
-func (s storageUser) GetIgnore(userId uint32) (*[]user.IgnoreUser, error) {
+func (s storageUser) GetIgnore(userId int64) (*[]user.IgnoreUser, error) {
 	var users []user.IgnoreUser
 	keys, err := s.redis.HKeys(context.TODO(), "user:"+strconv.Itoa(int(userId))+":ignores").Result()
 	if err != nil {
@@ -205,8 +205,8 @@ func (s storageUser) GetIgnore(userId uint32) (*[]user.IgnoreUser, error) {
 	} else {
 		for _, key := range keys {
 			useranem, _ := s.redis.HGet(context.TODO(), "user:"+strconv.Itoa(int(userId))+":ignores", key).Result()
-			keyInt, _ := strconv.ParseInt(key, 10, 32)
-			users = append(users, user.IgnoreUser{IgnoreID: int32(keyInt), IgnoreUser: user.User{Username: useranem}})
+			keyInt, _ := strconv.ParseInt(key, 10, 64)
+			users = append(users, user.IgnoreUser{IgnoreID: int64(keyInt), IgnoreUser: user.User{Username: useranem}})
 		}
 	}
 	return &users, err

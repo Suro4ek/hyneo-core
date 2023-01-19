@@ -51,14 +51,14 @@ func (s *UserService) GetLinkedUsers(userId int64) ([]LinkUser, error) {
 	return s.userService.GetLinkedUsers(userId)
 }
 
-func (s *UserService) AddIgnore(userId uint32, ignoreId int32) error {
+func (s *UserService) AddIgnore(userId int64, ignoreId int64) error {
 	return s.userService.AddIgnore(userId, ignoreId)
 }
 
-func (s *UserService) RemoveIgnore(userId uint32, ignoreId int32) error {
+func (s *UserService) RemoveIgnore(userId int64, ignoreId int64) error {
 	return s.userService.RemoveIgnore(userId, ignoreId)
 }
 
-func (s *UserService) IgnoreList(userId uint32) (*[]IgnoreUser, error) {
+func (s *UserService) IgnoreList(userId int64) (*[]IgnoreUser, error) {
 	return s.userService.GetIgnore(userId)
 }

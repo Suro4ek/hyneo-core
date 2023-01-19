@@ -3,7 +3,7 @@ package user
 import "time"
 
 type User struct {
-	ID           uint32    `json:"id"`
+	ID           int64     `json:"id"`
 	Username     string    `json:"username"`
 	PasswordHash string    `json:"password_hash"`
 	RegisteredIP string    `json:"registered_ip"`
@@ -16,8 +16,8 @@ type User struct {
 
 type IgnoreUser struct {
 	ID         uint32 `json:"id" gorm:"primarykey"`
-	UserID     uint32 `json:"user_id"` //if user id == -1 is all, is user id != -1
-	IgnoreID   int32  `json:"ignore_id"`
+	UserID     int64  `json:"user_id"` //if user id == -1 is all, is user id != -1
+	IgnoreID   int64  `json:"ignore_id"`
 	IgnoreUser User   `gorm:"foreignKey:ignore_id"`
 }
 

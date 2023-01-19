@@ -25,21 +25,21 @@ service UserService {
 }
 
 message AddIgnoreRequest {
-    int32 user_id = 1;
-    int32 ignore_id = 2;
+    int64 user_id = 1;
+    int64 ignore_id = 2;
 }
 
 message RemoveIgnoreRequest {
-    int32 user_id = 1;
-    int32 ignore_id = 2;
+    int64 user_id = 1;
+    int64 ignore_id = 2;
 }
 
 message GetIgnoreListRequest {
-    int32 user_id = 1;
+    int64 user_id = 1;
 }
 
 message IgnoreUser{
-    int32 id = 1;
+    int64 id = 1;
     string username = 2;
 }
 
@@ -48,7 +48,7 @@ message GetIgnoreListResponse {
 }
 
 message User {
-    uint32 id = 1;
+    int64 id = 1;
     string username = 2;
     google.protobuf.Timestamp last_login = 3;
     string last_server = 4;
@@ -65,7 +65,7 @@ message LoginRequest {
 }
 
 message UpdateLastServerRequest{
-    uint32 user_id = 1;
+    int64 user_id = 1;
     string last_server = 2;
 }
 

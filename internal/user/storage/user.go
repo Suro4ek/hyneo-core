@@ -188,8 +188,8 @@ func (s storageUser) GetIgnore(userId int64) (*[]user.IgnoreUser, error) {
 	if err != nil {
 		err := s.client.DB.
 			Model(&user.IgnoreUser{}).
-			Where(&user.IgnoreUser{UserID: userId}).
 			Joins("User").
+			Where(&user.IgnoreUser{UserID: userId}).
 			Find(&users).Error
 		if err != nil {
 			return nil, err

@@ -37,7 +37,7 @@ func main() {
 	passwordService := password.NewPasswordService()
 
 	storageUser := storage.CreateStorageUser(client)
-	userService := user.CreateUserService(storageUser)
+	userService := user.CreateUserService(storageUser, &logger)
 
 	runServices := RunServices(cfg, codeService, redisClient, &logger, passwordService, storageUser)
 	logger.Info("Register commands")

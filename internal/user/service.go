@@ -10,9 +10,10 @@ type UserService struct {
 	log         *logging.Logger
 }
 
-func CreateUserService(userService Service) *UserService {
+func CreateUserService(userService Service, log *logging.Logger) *UserService {
 	return &UserService{
 		userService: userService,
+		log:         log,
 	}
 }
 

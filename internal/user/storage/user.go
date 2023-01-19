@@ -152,7 +152,7 @@ func (s storageUser) AddIgnore(userId int64, ignoreUserId int64) error {
 		if err != nil {
 			return err
 		}
-		err = s.client.DB.Model(&user.IgnoreUser{}).Where(&user.IgnoreUser{UserID: userId, IgnoreID: ignoreUserId}).Joins("User").First(u).Error
+		err = s.client.DB.Model(&user.IgnoreUser{}).Joins("User").Where(&user.IgnoreUser{UserID: userId, IgnoreID: ignoreUserId}).First(u).Error
 		if err != nil {
 			return err
 		}

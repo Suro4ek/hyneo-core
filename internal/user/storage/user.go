@@ -199,6 +199,15 @@ func (s storageUser) GetIgnore(userId int64) (*[]user.IgnoreUser, error) {
 		if err != nil {
 			return nil, err
 		}
+	} else if len(keys) == 0 {
+		err := s.client.DB.
+			Model(&user.IgnoreUser{}).
+			Preload("Users").
+			Where(&user.IgnoreUser{UserID: userId}).
+			Find(&users).Error
+		if err != nil {
+			return nil, err
+		}
 		ctx := context.TODO()
 		if _, err := s.redis.Pipelined(ctx, func(rdb redis.Pipeliner) error {
 			for _, u := range users {

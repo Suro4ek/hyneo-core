@@ -178,7 +178,7 @@ func (s storageUser) RemoveIgnore(userId uint32, ignoreUserId int32) error {
 
 func (s storageUser) GetIgnore(userId uint32) (*[]user.IgnoreUser, error) {
 	var users []user.IgnoreUser
-	err := s.redis.HGetAll(context.TODO(), "ignore:"+strconv.Itoa(int(userId))).Scan(&users)
+	keys, err := s.redis.HGetAll(context.TODO(), "ignore:"+strconv.Itoa(int(userId))).Result()
 	if err != nil {
 		err := s.client.DB.
 			Model(&user.IgnoreUser{}).
@@ -199,6 +199,11 @@ func (s storageUser) GetIgnore(userId uint32) (*[]user.IgnoreUser, error) {
 		err = s.redis.Expire(context.TODO(), "ignore:"+strconv.Itoa(int(userId)), time.Second*60).Err()
 		if err != nil {
 			return nil, err
+		}
+	} else {
+		for _, key := range keys {
+			keyInt, _ := strconv.ParseInt(key, 10, 32)
+			users = append(users, user.IgnoreUser{IgnoreID: int32(keyInt)})
 		}
 	}
 	return &users, err

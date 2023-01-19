@@ -50,7 +50,7 @@ func (s *service) Register(createUser *user.User) (*user.User, error) {
 	createUser.Session = time.Now().Add(time.Hour * 24)
 	createUser.Authorized = true
 	createUser.LastJoin = time.Now()
-	_, err := s.userService.CreateUser(*createUser)
+	u, err := s.userService.CreateUser(*createUser)
 	countUsers, err := s.userService.CountAccounts(createUser.RegisteredIP)
 	if countUsers >= 4 {
 		return nil, mc.AccountsLimit
@@ -59,7 +59,7 @@ func (s *service) Register(createUser *user.User) (*user.User, error) {
 		s.log.Error(err)
 		return nil, mc.Fault
 	}
-	return createUser, nil
+	return u, nil
 }
 
 func (s *service) ChangePassword(username string, oldPassword string, newPassword string) error {

@@ -202,7 +202,7 @@ func (s storageUser) GetIgnore(userId int64) (*[]user.IgnoreUser, error) {
 	} else if len(keys) == 0 {
 		err := s.client.DB.
 			Model(&user.IgnoreUser{}).
-			Preload("Users").
+			Joins("User").
 			Where(&user.IgnoreUser{UserID: userId}).
 			Find(&users).Error
 		if err != nil {

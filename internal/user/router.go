@@ -76,7 +76,7 @@ func convertIgnoreListToGRPC(ignoreList []IgnoreUser) []*auth.IgnoreUser {
 		ignoreListGRPC = append(ignoreListGRPC,
 			&auth.IgnoreUser{
 				Id:       ignore.IgnoreID,
-				Username: ignore.IgnoreUser.Username,
+				Username: ignore.User.Username,
 			})
 	}
 	return ignoreListGRPC

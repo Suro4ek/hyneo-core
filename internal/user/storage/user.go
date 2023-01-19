@@ -211,7 +211,7 @@ func (s storageUser) GetIgnore(userId int64) (*[]user.IgnoreUser, error) {
 		ctx := context.TODO()
 		if _, err := s.redis.Pipelined(ctx, func(rdb redis.Pipeliner) error {
 			for _, u := range users {
-				rdb.HSet(ctx, "user:"+strconv.Itoa(int(userId))+":ignores", strconv.Itoa(int(u.IgnoreID)), u.IgnoreUser.Username)
+				rdb.HSet(ctx, "user:"+strconv.Itoa(int(userId))+":ignores", strconv.Itoa(int(u.IgnoreID)), u.User.Username)
 			}
 			return nil
 		}); err != nil {
@@ -226,7 +226,7 @@ func (s storageUser) GetIgnore(userId int64) (*[]user.IgnoreUser, error) {
 			useranem, _ := s.redis.HGet(context.TODO(), "user:"+strconv.Itoa(int(userId))+":ignores", key).Result()
 			fmt.Println(useranem)
 			keyInt, _ := strconv.ParseInt(key, 10, 64)
-			users = append(users, user.IgnoreUser{IgnoreID: int64(keyInt), IgnoreUser: user.User{Username: useranem}})
+			users = append(users, user.IgnoreUser{IgnoreID: int64(keyInt), User: user.User{Username: useranem}})
 		}
 	}
 	return &users, err

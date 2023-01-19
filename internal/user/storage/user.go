@@ -15,9 +15,10 @@ type storageUser struct {
 	redis  *redis.Client
 }
 
-func CreateStorageUser(client *mysql.Client) user.Service {
+func CreateStorageUser(client *mysql.Client, redis *redis.Client) user.Service {
 	return &storageUser{
 		client: client,
+		redis:  redis,
 	}
 }
 

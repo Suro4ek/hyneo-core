@@ -18,7 +18,7 @@ type IgnoreUser struct {
 	ID         uint32 `json:"id"`
 	UserID     int64  `json:"user_id"` //if user id == -1 is all, is user id != -1
 	IgnoreID   int64  `json:"ignore_id"`
-	IgnoreUser User   `gorm:"foreignKey:ignore_id"`
+	IgnoreUser User   `gorm:"foreignKey:IgnoreID; References:ID"`
 }
 
 // TODO подумать насчет DoubleAuth оставить его или нет

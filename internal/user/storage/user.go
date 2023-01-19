@@ -192,7 +192,7 @@ func (s storageUser) GetIgnore(userId int64) (*[]user.IgnoreUser, error) {
 	if err != nil {
 		err := s.client.DB.
 			Model(&user.IgnoreUser{}).
-			Preload("Users").
+			Joins("User").
 			Where(&user.IgnoreUser{UserID: userId}).
 			Find(&users).Error
 		fmt.Println(users)

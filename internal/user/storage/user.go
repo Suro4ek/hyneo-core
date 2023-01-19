@@ -151,7 +151,7 @@ func (s storageUser) AddIgnore(userId int64, ignoreUserId int64) error {
 		err = s.redis.Expire(context.TODO(), "user:"+strconv.Itoa(int(userId))+":ignores", time.Second*60).Err()
 		return err
 	} else {
-		u := &user.IgnoreUser{}
+		u := &user.User{}
 		err := s.client.DB.Create(&user.IgnoreUser{UserID: userId, IgnoreID: ignoreUserId}).Error
 		if err != nil {
 			return err
@@ -160,7 +160,7 @@ func (s storageUser) AddIgnore(userId int64, ignoreUserId int64) error {
 		if err != nil {
 			return err
 		}
-		err = s.redis.HSet(context.TODO(), "user:"+strconv.Itoa(int(userId))+":ignores", strconv.Itoa(int(ignoreUserId)), u.IgnoreUser.Username).Err()
+		err = s.redis.HSet(context.TODO(), "user:"+strconv.Itoa(int(userId))+":ignores", strconv.Itoa(int(ignoreUserId)), u.Username).Err()
 		if err != nil {
 			return err
 		}

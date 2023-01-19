@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"fmt"
 	"github.com/go-redis/redis/v9"
 	"hyneo/internal/user"
 	"hyneo/pkg/mysql"
@@ -190,7 +191,7 @@ func (s storageUser) GetIgnore(userId uint32) (*[]user.IgnoreUser, error) {
 		ctx := context.TODO()
 		if _, err := s.redis.Pipelined(ctx, func(rdb redis.Pipeliner) error {
 			for _, u := range users {
-				rdb.HSet(ctx, "ignore:"+strconv.Itoa(int(userId)), strconv.Itoa(int(u.IgnoreID)))
+				rdb.HSet(ctx, "ignore:"+strconv.Itoa(int(userId)), strconv.Itoa(int(u.IgnoreID)), "ignored")
 			}
 			return nil
 		}); err != nil {
@@ -202,6 +203,7 @@ func (s storageUser) GetIgnore(userId uint32) (*[]user.IgnoreUser, error) {
 		}
 	} else {
 		for _, key := range keys {
+			fmt.Print(key)
 			keyInt, _ := strconv.ParseInt(key, 10, 32)
 			users = append(users, user.IgnoreUser{IgnoreID: int32(keyInt)})
 		}

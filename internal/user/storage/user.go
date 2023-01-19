@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"fmt"
 	"github.com/go-redis/redis/v9"
 	"hyneo/internal/user"
 	"hyneo/pkg/mysql"
@@ -209,6 +210,7 @@ func (s storageUser) GetIgnore(userId int64) (*[]user.IgnoreUser, error) {
 	} else {
 		for _, key := range keys {
 			useranem, _ := s.redis.HGet(context.TODO(), "user:"+strconv.Itoa(int(userId))+":ignores", key).Result()
+			fmt.Println(useranem)
 			keyInt, _ := strconv.ParseInt(key, 10, 64)
 			users = append(users, user.IgnoreUser{IgnoreID: int64(keyInt), IgnoreUser: user.User{Username: useranem}})
 		}

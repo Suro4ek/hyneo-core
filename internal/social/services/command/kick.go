@@ -20,7 +20,7 @@ var Kick = &Command{
 			UserId:  fmt.Sprintf("%d", user.UserID),
 			Message: "§cВы кикнуты из игры с помощью бота",
 		})
-		ser.Redis.Publish(context.Background(), "messenger.bungee", string(out))
+		ser.Redis.Publish(context.Background(), "messenger.velocity", string(out))
 		service.SendMessage("Вы кикнули ", msg.ChatID)
 	},
 }

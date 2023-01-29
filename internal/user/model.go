@@ -12,6 +12,7 @@ type User struct {
 	LastJoin     time.Time `json:"last_join"`
 	LastServer   string    `json:"last_server"`
 	Authorized   bool      `json:"authorized"`
+	Email        string    `json:"email"`
 }
 
 type IgnoreUser struct {

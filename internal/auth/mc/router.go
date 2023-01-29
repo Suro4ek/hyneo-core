@@ -34,6 +34,7 @@ func (r *routerService) Register(_ context.Context, res *auth.RegisterRequest) (
 	authUser.LastJoin = time.Now()
 	authUser.Session = time.Now().Add(24 * time.Hour)
 	authUser.Authorized = true
+	authUser.Email = ""
 	u, err := r.service.Register(authUser)
 	if err != nil {
 		return nil, err
@@ -112,5 +113,6 @@ func convertGRPUserToUser(authUser *auth.User) *user.User {
 		Authorized: authUser.Auth,
 		IP:         authUser.Ip,
 		LastServer: authUser.LastServer,
+		Email:      "",
 	}
 }

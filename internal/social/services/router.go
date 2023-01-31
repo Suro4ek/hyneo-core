@@ -33,14 +33,14 @@ func (r *serviceRouter) NotifyServer(_ context.Context, res *service.NotifyServe
 		if u.ServiceId != s.GetService().ServiceID {
 			continue
 		}
-		s.SendMessage("Вы подключились к серверу "+res.GetServer(), u.ServiceUserID)
+		s.SendMessage("Вы подключились к серверу "+res.GetServerName(), u.ServiceUserID)
 	}
 	return &emptypb.Empty{}, nil
 }
 
 func (r *serviceRouter) Join(_ context.Context, res *service.JoinRequest) (*emptypb.Empty, error) {
 	for _, s := range r.services {
-		u, err := s.GetUserID(int64(res.UserId))
+		u, err := s.GetUserID(res.UserId)
 		if err != nil {
 			return nil, UserNotFound
 		}

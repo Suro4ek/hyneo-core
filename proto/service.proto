@@ -20,11 +20,11 @@ message CheckCodeRequest {
 
 message NotifyServerRequest {
     uint32 user_id = 1;
-    string server = 2;
+    string server_name = 2;
 }
 
 message JoinRequest {
-    uint32 user_id = 1;
+    int64 user_id = 1;
     string ip = 2;
 }
 

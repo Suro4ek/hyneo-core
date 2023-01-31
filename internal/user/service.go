@@ -21,7 +21,7 @@ func (s *UserService) GetUser(username string) (*User, error) {
 	userByName, err := s.userService.GetUserByName(username)
 	if err != nil {
 		s.log.Error(err)
-		return nil, UserNotFound
+		return nil, NotFound
 	}
 	if userByName.Session.Sub(time.Now()) < 0 {
 		userByName.Authorized = false
@@ -36,7 +36,7 @@ func (s *UserService) GetUser(username string) (*User, error) {
 
 func (s *UserService) UpdateUser(user *User) (*User, error) {
 	if user.ID == 0 {
-		return nil, UserNotFound
+		return nil, NotFound
 	}
 	user.LastJoin = time.Now()
 	u, err := s.userService.UpdateUser(user.ID, *user)
@@ -51,14 +51,14 @@ func (s *UserService) GetLinkedUsers(userId int64) ([]LinkUser, error) {
 	return s.userService.GetLinkedUsers(userId)
 }
 
-func (s *UserService) AddIgnore(userId uint32, ignoreId int32) error {
+func (s *UserService) AddIgnore(userId int64, ignoreId int64) error {
 	return s.userService.AddIgnore(userId, ignoreId)
 }
 
-func (s *UserService) RemoveIgnore(userId uint32, ignoreId int32) error {
+func (s *UserService) RemoveIgnore(userId int64, ignoreId int64) error {
 	return s.userService.RemoveIgnore(userId, ignoreId)
 }
 
-func (s *UserService) IgnoreList(userId uint32) (*[]IgnoreUser, error) {
+func (s *UserService) IgnoreList(userId int64) (*[]IgnoreUser, error) {
 	return s.userService.GetIgnore(userId)
 }

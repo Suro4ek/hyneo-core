@@ -44,7 +44,7 @@ func (r userRouter) GetUser(ctx context.Context, res *auth.GetUserRequest) (*aut
 }
 
 func (r userRouter) AddIgnore(ctx context.Context, res *auth.AddIgnoreRequest) (*emptypb.Empty, error) {
-	err := r.service.AddIgnore(uint32(res.GetUserId()), res.GetIgnoreId())
+	err := r.service.AddIgnore(int64(res.GetUserId()), res.GetIgnoreId())
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +52,7 @@ func (r userRouter) AddIgnore(ctx context.Context, res *auth.AddIgnoreRequest) (
 }
 
 func (r userRouter) RemoveIgnore(ctx context.Context, res *auth.RemoveIgnoreRequest) (*emptypb.Empty, error) {
-	err := r.service.RemoveIgnore(uint32(res.GetUserId()), res.GetIgnoreId())
+	err := r.service.RemoveIgnore(int64(res.GetUserId()), res.GetIgnoreId())
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +60,7 @@ func (r userRouter) RemoveIgnore(ctx context.Context, res *auth.RemoveIgnoreRequ
 }
 
 func (r userRouter) GetIgnoreList(ctx context.Context, res *auth.GetIgnoreListRequest) (*auth.GetIgnoreListResponse, error) {
-	users, err := r.service.IgnoreList(uint32(res.GetUserId()))
+	users, err := r.service.IgnoreList(int64(res.GetUserId()))
 	if err != nil {
 		return nil, err
 	}
@@ -69,18 +69,22 @@ func (r userRouter) GetIgnoreList(ctx context.Context, res *auth.GetIgnoreListRe
 	}, nil
 }
 
-//convert ignoreList to int32[]
-func convertIgnoreListToGRPC(ignoreList []IgnoreUser) []int32 {
-	var ignoreListGRPC []int32
+//convert ignoreList to auth.IgnoreUser[]
+func convertIgnoreListToGRPC(ignoreList []IgnoreUser) []*auth.IgnoreUser {
+	var ignoreListGRPC []*auth.IgnoreUser
 	for _, ignore := range ignoreList {
-		ignoreListGRPC = append(ignoreListGRPC, ignore.IgnoreID)
+		ignoreListGRPC = append(ignoreListGRPC,
+			&auth.IgnoreUser{
+				Id:       ignore.IgnoreID,
+				Username: ignore.User.Username,
+			})
 	}
 	return ignoreListGRPC
 }
 
 func convertUserToGRPCUser(user *User) *auth.User {
 	return &auth.User{
-		Id:           user.ID,
+		Id:           int64(user.ID),
 		Username:     user.Username,
 		LastLogin:    timestamppb.New(user.LastJoin),
 		Ip:           user.IP,
@@ -93,7 +97,7 @@ func convertUserToGRPCUser(user *User) *auth.User {
 
 func convertGRPUserToUser(authUser *auth.User) *User {
 	return &User{
-		ID:         authUser.Id,
+		ID:         int64(authUser.Id),
 		Username:   authUser.Username,
 		LastJoin:   authUser.LastLogin.AsTime(),
 		Authorized: authUser.Auth,

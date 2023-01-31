@@ -3,7 +3,7 @@ package user
 import "time"
 
 type User struct {
-	ID           uint32    `json:"id"`
+	ID           int64     `json:"id" gorm:"primary_key;auto_increment"`
 	Username     string    `json:"username"`
 	PasswordHash string    `json:"password_hash"`
 	RegisteredIP string    `json:"registered_ip"`
@@ -12,14 +12,14 @@ type User struct {
 	LastJoin     time.Time `json:"last_join"`
 	LastServer   string    `json:"last_server"`
 	Authorized   bool      `json:"authorized"`
+	Email        string    `json:"email"`
 }
 
 type IgnoreUser struct {
-	ID       uint32 `json:"id" redis:"-" gorm:"primarykey"`
-	UserID   uint32 `json:"user_id" redis:"-"` //if user id == -1 is all, is user id != -1
-	IgnoreID int32  `json:"ignore_id" redis:"ignore_id"`
-	//User       User   `gorm:"foreignKey:user_id" redis:"-"`
-	//IgnoreUser User   `gorm:"foreignKey:ignore_id" redis:"-"`
+	ID       uint32 `json:"id" gorm:"primary_key;auto_increment"`
+	UserID   int64  `json:"user_id"` //if user id == -1 is all, is user id != -1
+	IgnoreID int64  `json:"ignore_id"`
+	User     User   `gorm:"foreignKey:IgnoreID; references:ID"`
 }
 
 // TODO подумать насчет DoubleAuth оставить его или нет

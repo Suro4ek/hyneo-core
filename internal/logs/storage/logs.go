@@ -9,8 +9,10 @@ type logsStorage struct {
 	client *mysql.Client
 }
 
-func NewLogsStorage() logs.LogsStorage {
-	return &logsStorage{}
+func NewLogsStorage(client *mysql.Client) logs.LogsStorage {
+	return &logsStorage{
+		client: client,
+	}
 }
 
 func (l logsStorage) Logs(logs *logs.Logs) error {

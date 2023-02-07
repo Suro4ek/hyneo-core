@@ -1,14 +1,16 @@
 package logs
 
-type LogsService struct {
+type Service struct {
 	storage LogsStorage
 }
 
-func NewLogsService() *LogsService {
-	return &LogsService{}
+func NewLogsService(storage LogsStorage) *Service {
+	return &Service{
+		storage: storage,
+	}
 }
 
-func (s LogsService) Join(
+func (s Service) Join(
 	playerId int64,
 	serverName string,
 	message string) error {
@@ -20,7 +22,7 @@ func (s LogsService) Join(
 	})
 }
 
-func (s LogsService) Quit(
+func (s Service) Quit(
 	playerId int64,
 	serverName string,
 	message string) error {
@@ -32,7 +34,7 @@ func (s LogsService) Quit(
 	})
 }
 
-func (s LogsService) Message(
+func (s Service) Message(
 	playerId int64,
 	serverName string,
 	message string) error {
@@ -44,7 +46,7 @@ func (s LogsService) Message(
 	})
 }
 
-func (s LogsService) Command(
+func (s Service) Command(
 	playerId int64,
 	serverName string,
 	message string) error {

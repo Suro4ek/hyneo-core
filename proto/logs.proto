@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package server;
+import "google/protobuf/empty.proto";
+option go_package = "protos/logs/";
+
+service Logs {
+//  rpc GetLogs (google.protobuf.Empty) returns (stream Log) {}
+  rpc Join(Request) returns (google.protobuf.Empty) {}
+  rpc Quit(Request) returns (google.protobuf.Empty) {}
+  rpc Message(Request) returns (google.protobuf.Empty) {}
+  rpc Command(Request) returns (google.protobuf.Empty) {}
+}
+
+message Request {
+  int64 playerId = 1;
+  string serverName = 2;
+  string message = 3;
+}
+

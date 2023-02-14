@@ -145,10 +145,10 @@ func (s *service) UpdateLastServer(userId int64, server string) error {
 		return mc.Fault
 	}
 	u.LastServer = server
-	_, err = s.userService.UpdateUser(userId, *u)
-	if err != nil {
-		s.log.Error(err)
-		return mc.Fault
-	}
+	//_, err = s.userService.UpdateUser(userId, *u)
+	//if err != nil {
+	//	s.log.Error(err)
+	//	return mc.Fault
+	//}
 	return nil
 }

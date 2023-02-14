@@ -25,11 +25,11 @@ func (s *UserService) GetUser(username string) (*User, error) {
 	}
 	if userByName.Session.Sub(time.Now()) < 0 {
 		userByName.Authorized = false
-	}
-	_, err = s.userService.UpdateUser(userByName.ID, *userByName)
-	if err != nil {
-		s.log.Error(err)
-		return nil, Fault
+		_, err = s.userService.UpdateUser(userByName.ID, *userByName)
+		if err != nil {
+			s.log.Error(err)
+			return nil, Fault
+		}
 	}
 	return userByName, nil
 }

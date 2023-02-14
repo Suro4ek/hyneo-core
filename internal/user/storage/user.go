@@ -52,7 +52,19 @@ func (s storageUser) GetUserByName(username string) (*user.User, error) {
 }
 
 func (s storageUser) UpdateUser(id int64, updateUser user.User) (*user.User, error) {
-	err := s.client.DB.Model(&user.User{}).Where(&user.User{ID: id}).Updates(updateUser).First(&updateUser).Error
+	err := s.client.DB.Model(&user.User{}).Where(&user.User{ID: id}).
+		Updates(map[string]interface{}{
+			"username":      updateUser.Username,
+			"password_hash": updateUser.PasswordHash,
+			"ip":            updateUser.IP,
+			"registered_ip": updateUser.RegisteredIP,
+			"last_join":     updateUser.LastJoin,
+			"session":       updateUser.Session,
+			"last_server":   updateUser.LastServer,
+			"authorized":    updateUser.Authorized,
+			"email":         updateUser.Email,
+		}).
+		First(&updateUser).Error
 	return &updateUser, err
 }
 

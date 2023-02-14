@@ -38,8 +38,13 @@ func (s *UserService) UpdateUser(user *User) (*User, error) {
 	if user.ID == 0 {
 		return nil, NotFound
 	}
+	uLast, err := s.userService.GetUserByID(user.ID)
+	uLast.Authorized = user.Authorized
+	uLast.Email = user.Email
+	uLast.IP = user.IP
+	uLast.LastServer = user.LastServer
 	user.LastJoin = time.Now()
-	u, err := s.userService.UpdateUser(user.ID, *user)
+	u, err := s.userService.UpdateUser(uLast.ID, *uLast)
 	if err != nil {
 		s.log.Error(err)
 		return nil, Fault

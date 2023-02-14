@@ -65,6 +65,10 @@ func migrate(client *mysql.Client) {
 	if err != nil {
 		return
 	}
+	err = client.DB.AutoMigrate(&logs.Logs{})
+	if err != nil {
+		return
+	}
 }
 
 func runGRPCServer(

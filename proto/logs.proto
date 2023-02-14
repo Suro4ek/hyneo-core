@@ -17,4 +17,3 @@ message Request {
   string serverName = 2;
   string message = 3;
 }
-

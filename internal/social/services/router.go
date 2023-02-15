@@ -80,6 +80,7 @@ func (r *serviceRouter) CheckCode(_ context.Context, res *service.CheckCodeReque
 			Banned:        false,
 			DoubleAuth:    false,
 		}
+		print(vkUser)
 		err = ser.Client.DB.Save(vkUser).Error
 		if err != nil {
 			return nil, err

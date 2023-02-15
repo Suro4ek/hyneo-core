@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"fmt"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"hyneo/internal/user"
 	"hyneo/pkg/mysql"
@@ -80,7 +81,7 @@ func (r *serviceRouter) CheckCode(_ context.Context, res *service.CheckCodeReque
 			Banned:        false,
 			DoubleAuth:    false,
 		}
-		print(vkUser)
+		fmt.Println(vkUser)
 		err = ser.Client.DB.Save(vkUser).Error
 		if err != nil {
 			return nil, err

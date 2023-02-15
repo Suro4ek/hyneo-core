@@ -45,7 +45,7 @@ func main() {
 	userService := user.CreateUserService(storageUser, &logger)
 	logsService := logs.NewLogsService(storageLogs)
 
-	runServices := RunServices(cfg, codeService, redisClient, &logger, passwordService, storageUser)
+	runServices := RunServices(cfg, codeService, redisClient, &logger, passwordService, storageUser, client)
 	logger.Info("Register commands")
 	command.RegisterCommands()
 	logger.Info("Run GRPC Server to " + cfg.GRPCPort)

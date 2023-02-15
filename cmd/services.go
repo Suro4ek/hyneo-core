@@ -13,6 +13,7 @@ import (
 	vk3 "hyneo/internal/social/services/vk"
 	"hyneo/internal/user"
 	"hyneo/pkg/logging"
+	"hyneo/pkg/mysql"
 )
 
 func RunServices(
@@ -22,10 +23,11 @@ func RunServices(
 	log *logging.Logger,
 	passwordService password.Service,
 	userService user.Service,
+	client *mysql.Client,
 ) []services.Service {
 	servicess := make([]services.Service, 0)
-	servicess = append(servicess, runVKLongServer(cfg, service, redis, log, passwordService, userService))
-	servicess = append(servicess, runTGServer(cfg, service, redis, log, passwordService, userService))
+	servicess = append(servicess, runVKLongServer(cfg, service, redis, log, passwordService, userService, client))
+	servicess = append(servicess, runTGServer(cfg, service, redis, log, passwordService, userService, client))
 	return servicess
 }
 
@@ -36,11 +38,12 @@ func runVKLongServer(
 	log *logging.Logger,
 	passwordService password.Service,
 	userService user.Service,
+	client *mysql.Client,
 ) services.Service {
 	token := cfg.Social.VK.Token
 	vk := api.NewVK(token)
 
-	service := vk3.NewVkService(vk, code, redis, 0, log, passwordService, userService)
+	service := vk3.NewVkService(vk, code, redis, 0, log, passwordService, userService, client)
 	// get information about the group
 	group, err := vk.GroupsGetByID(api.Params{
 		"group_id": cfg.Social.VK.GroupID,
@@ -68,6 +71,7 @@ func runTGServer(
 	log *logging.Logger,
 	passwordService password.Service,
 	userService user.Service,
+	client *mysql.Client,
 ) services.Service {
 	bot, err := tgbotapi.NewBotAPI(cfg.Social.Telegram.Token)
 	if err != nil {
@@ -78,7 +82,7 @@ func runTGServer(
 
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 
-	service := telegram2.NewTelegramService(bot, code, redis, 1, log, passwordService, userService)
+	service := telegram2.NewTelegramService(bot, code, redis, 1, log, passwordService, userService, client)
 	log.Info("Run Listen message Telegram")
 	go func() {
 		handler := telegram2.NewTelegramHandler(bot, &service)

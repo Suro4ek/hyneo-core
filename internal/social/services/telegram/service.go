@@ -9,6 +9,7 @@ import (
 	"hyneo/internal/social/services"
 	"hyneo/internal/user"
 	"hyneo/pkg/logging"
+	"hyneo/pkg/mysql"
 )
 
 type telegramService struct {
@@ -19,6 +20,7 @@ type telegramService struct {
 	log             *logging.Logger
 	PasswordService password.Service
 	userService     user.Service
+	client          *mysql.Client
 }
 
 func NewTelegramService(
@@ -29,6 +31,7 @@ func NewTelegramService(
 	log *logging.Logger,
 	passwordService password.Service,
 	userService user.Service,
+	client *mysql.Client,
 ) services.Service {
 	return &telegramService{
 		bot:             bot,
@@ -38,6 +41,7 @@ func NewTelegramService(
 		log:             log,
 		PasswordService: passwordService,
 		userService:     userService,
+		client:          client,
 	}
 }
 
@@ -58,6 +62,7 @@ func (s *telegramService) GetService() *services.GetService {
 		Code:      s.Code,
 		Redis:     s.Redis,
 		Password:  s.PasswordService,
+		Client:    s.client,
 	}
 }
 

@@ -12,6 +12,7 @@ import (
 	"hyneo/internal/social/services"
 	"hyneo/internal/user"
 	"hyneo/pkg/logging"
+	"hyneo/pkg/mysql"
 )
 
 type Service struct {
@@ -22,6 +23,7 @@ type Service struct {
 	log             *logging.Logger
 	PasswordService password.Service
 	userService     user.Service
+	client          *mysql.Client
 }
 
 func NewVkService(
@@ -32,6 +34,7 @@ func NewVkService(
 	log *logging.Logger,
 	passwordService password.Service,
 	userService user.Service,
+	client *mysql.Client,
 ) services.Service {
 	return &Service{
 		Vk:              VK,
@@ -41,6 +44,7 @@ func NewVkService(
 		log:             log,
 		PasswordService: passwordService,
 		userService:     userService,
+		client:          client,
 	}
 }
 
@@ -58,6 +62,7 @@ func (s *Service) GetService() *services.GetService {
 		Code:      s.Code,
 		Redis:     s.Redis,
 		Password:  s.PasswordService,
+		Client:    s.client,
 	}
 }
 
